@@ -9,7 +9,7 @@ const router = Router()
 
 
 router.post('/users', new CreateUserController().handle)
-router.put('/users', new UpdateUserController().handle)
+router.put('/users', isAuthenticated, new UpdateUserController().handle)
 router.post('/session', new AuthUserController().handle)
 router.get('/me', isAuthenticated, new DetailUserController().handle)
 
