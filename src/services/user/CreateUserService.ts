@@ -13,8 +13,20 @@ class CreateUserService {
     firstName, lastName, email, password 
   }: UserRequest){
 
+    if(!firstName) {
+      throw new Error("Informe o primeiro nome.")
+    }
+
+    if(!lastName) {
+      throw new Error("Informe o sobrenome.")
+    }
+
     if(!email) {
-      throw new Error("E-mail incorreto.")
+      throw new Error("Informe o e-mail.")
+    }
+
+    if(!password) {
+      throw new Error("Informe a senha.")
     }
 
     const userAlreadyExists = await prismaClient.user.findFirst({
@@ -24,7 +36,7 @@ class CreateUserService {
     })
 
     if(userAlreadyExists) {
-      throw new Error("Usuário já cadastrado.")
+      throw new Error("Usuário já cadastrado. Informe outro e-mail")
     }
 
     const user = await prismaClient.user.create({
