@@ -24,3 +24,29 @@ model User {
 
   @@map("users")
 }
+
+model Category {
+  id          String    @id   @default(uuid())
+  name        String
+  created_at  DateTime?       @default(now())
+  updated_at  DateTime?       @default(now())
+
+  @@map("categories")
+  products Product[]
+}
+
+model Product {
+  id                  String    @id   @default(uuid())
+  name                String
+  model               String?
+  description         String?
+  purchase_at         DateTime?
+  price               Float?
+  created_at          DateTime?       @default(now())
+  updated_at          DateTime?       @default(now())
+
+  category  Category  @relation(fields: [category_id], references: [id])
+
+  @@map("products")
+  category_id    String
+}
