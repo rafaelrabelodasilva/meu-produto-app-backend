@@ -4,8 +4,6 @@
 
 Backend em desenvolvimento.
 
----
-
 ## ⚙️ Stack
 
 - Node.js  
@@ -14,9 +12,9 @@ Backend em desenvolvimento.
 - PostgreSQL  
 - TypeScript  
 
----
-
 ## 🚀 Iniciando
+
+Clone [este respositório](https://github.com/rafaelrabelodasilva/meu-produto-app-backend) e instale as dependências:
 
 ```bash
 git clone <repo-url>
@@ -46,7 +44,6 @@ $ npm run start:dev
 
 🚧 Em desenvolvimento.
 
-
-## 👨‍💻 Author
+## 👨‍💻 Autor
 
 [Rafael Rabelo da Silva](https://www.linkedin.com/in/rafaelrabelodasilva/)
