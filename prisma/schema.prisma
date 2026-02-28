@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  firstName String   @map("first_name") // No código TS: firstName | No DB: first_name
+  lastName  String   @map("last_name")
+  email     String   @unique
+  password  String
+  
+  // Timestamps fundamentais
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users") // Define o nome da tabela no PostgreSQL como 'users'
+}
