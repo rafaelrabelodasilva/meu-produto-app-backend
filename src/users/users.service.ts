@@ -11,7 +11,7 @@ import { PrismaService } from '../../src/prisma/prisma.service.js';
 
 @Injectable()
 export class UsersService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
     const user = await this.prismaService.user.findFirst({
