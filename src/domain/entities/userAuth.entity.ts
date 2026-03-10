@@ -1,5 +1,6 @@
 import { Utils } from 'src/shared/utils/utils.js';
-import { Entity } from '../entity.js';
+import { Entity } from '../shared/entities/entity.js';
+import { UserAuthValidatorFactory } from '../factories/userAuth-validator.factory.js';
 
 export type UserCreateDto = {
   email: string;
@@ -27,7 +28,7 @@ export class UserAuth extends Entity {
   }
 
   protected validate(): void {
-    // Implementar
+    UserAuthValidatorFactory.create().validate(this);
   }
 
   public getEmail(): string {
