@@ -1,4 +1,4 @@
-import { Utils } from 'src/shared/utils/utils.js';
+import { Utils } from '../../shared/utils/utils.js';
 import { Entity } from '../shared/entities/entity.js';
 import { UserAuthValidatorFactory } from '../factories/userAuth-validator.factory.js';
 
