@@ -1,6 +1,7 @@
 import { Utils } from '../../shared/utils/utils.js';
 import { Entity } from '../shared/entities/entity.js';
-import { UserAuthValidatorFactory } from '../factories/userAuth-validator.factory.js';
+import { UserAuthValidatorFactory } from '../factories/userAuth.validator.factory.js';
+import { UserAuthPasswordValidatorFactory } from '../factories/userAuth-password.validator.factory.js';
 
 export type UserCreateDto = {
   email: string;
@@ -21,6 +22,9 @@ export class UserAuth extends Entity {
 
   public static create({ email, password }: UserCreateDto): UserAuth {
     const id = Utils.generateUUID();
+
+    UserAuthPasswordValidatorFactory.create().validate(password);
+
     const hashedPassword = Utils.encryptPassword(password);
     const createdAt = new Date();
     const updatedAt = new Date();
