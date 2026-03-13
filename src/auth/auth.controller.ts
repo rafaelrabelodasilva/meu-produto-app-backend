@@ -6,7 +6,7 @@ import { CurrentUser } from './decorators/current-user.decorator.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   login(@Body() body: LoginDto) {
@@ -22,5 +22,11 @@ export class AuthController {
   @Get('me')
   getMe(@CurrentUser() user: any) {
     return user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  logout(@CurrentUser() user: any) {
+    return this.authService.logout(user.userId);
   }
 }
