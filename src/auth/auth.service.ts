@@ -30,8 +30,60 @@ export class AuthService {
       email: user.email,
     };
 
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
+
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        refreshToken: hashedRefreshToken,
+      },
+    });
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken,
     };
+  }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+
+      if (!user || !user.refreshToken) {
+        throw new UnauthorizedException();
+      }
+
+      const tokenMatch = await bcrypt.compare(refreshToken, user.refreshToken);
+
+      if (!tokenMatch) {
+        throw new UnauthorizedException();
+      }
+
+      const newAccessToken = this.jwtService.sign(
+        {
+          sub: user.id,
+          email: user.email,
+        },
+        { expiresIn: '15m' },
+      );
+
+      return {
+        access_token: newAccessToken,
+      };
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 }
