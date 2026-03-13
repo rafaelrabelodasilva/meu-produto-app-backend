@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.4.2",
   "engineVersion": "94a226be1cf2967af2541cca5529f0f7ba866919",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id        String @id @default(uuid())\n  firstName String @map(\"first_name\") // No código TS: firstName | No DB: first_name\n  lastName  String @map(\"last_name\")\n  email     String @unique\n  password  String\n\n  refreshToken String? @map(\"refresh_token\")\n\n  // Timestamps fundamentais\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@map(\"users\") // Define o nome da tabela no PostgreSQL como 'users'\n}\n",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id        String @id @default(uuid())\n  firstName String @map(\"first_name\") // No código TS: firstName | No DB: first_name\n  lastName  String @map(\"last_name\")\n  email     String @unique\n  password  String\n\n  refreshToken String? @map(\"refresh_token\")\n\n  // Timestamps fundamentais\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@map(\"users\") // Define o nome da tabela no PostgreSQL como 'users'\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
