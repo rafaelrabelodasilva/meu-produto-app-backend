@@ -13,6 +13,8 @@ model User {
   lastName  String   @map("last_name")
   email     String   @unique
   password  String
+
+  refreshToken String? @map("refresh_token")
   
   // Timestamps fundamentais
   createdAt DateTime @default(now()) @map("created_at")

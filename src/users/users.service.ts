@@ -8,12 +8,15 @@ import { Prisma } from '../../src/generated/prisma/client.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
     const user = await this.prismaService.user.findFirst({
       where: { email: createUserDto.email },
     });
@@ -21,7 +24,10 @@ export class UsersService {
       throw new HttpException('E-mail já cadastrado', HttpStatus.BAD_REQUEST);
     }
     return await this.prismaService.user.create({
-      data: { ...createUserDto },
+      data: {
+        ...createUserDto,
+        password: hashedPassword,
+      },
     });
   }
 
