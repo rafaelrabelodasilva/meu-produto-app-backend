@@ -79,7 +79,7 @@ describe('AuthController', () => {
     expect(result).toEqual(user);
   });
 
-  it('should logout user', () => {
+  it('should logout user', async () => {
     mockAuthService.logout.mockResolvedValue({
       message: 'Logout realizado com sucesso',
     });
@@ -89,7 +89,7 @@ describe('AuthController', () => {
       email: 'test@test.com',
     };
 
-    const result = controller.logout(user);
+    const result = await controller.logout(user);
 
     expect(result).toEqual({
       message: 'Logout realizado com sucesso',
