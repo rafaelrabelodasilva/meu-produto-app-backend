@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AuthUser } from './types/auth-user.type';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -67,28 +68,28 @@ describe('AuthController', () => {
     expect(mockAuthService.refreshToken).toHaveBeenCalledWith('refreshToken');
   });
 
-  it('should return current user', async () => {
-    const user = {
+  it('should return current user', () => {
+    const user: AuthUser = {
       userId: '1',
       email: 'test@test.com',
     };
 
-    const result = await controller.getMe(user);
+    const result = controller.getMe(user);
 
     expect(result).toEqual(user);
   });
 
-  it('should logout user', async () => {
+  it('should logout user', () => {
     mockAuthService.logout.mockResolvedValue({
       message: 'Logout realizado com sucesso',
     });
 
-    const user = {
+    const user: AuthUser = {
       userId: '1',
       email: 'test@test.com',
     };
 
-    const result = await controller.logout(user);
+    const result = controller.logout(user);
 
     expect(result).toEqual({
       message: 'Logout realizado com sucesso',

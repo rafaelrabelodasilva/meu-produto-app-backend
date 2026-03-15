@@ -44,6 +44,8 @@ $ npm run start:dev
 
 🚧 Em desenvolvimento.
 
+![CI](https://github.com/rafaelrabelodasilva/meu-produto-app-backend/actions/workflows/ci.yml/badge.svg)
+
 ## 👨‍💻 Autor
 
 [Rafael Rabelo da Silva](https://www.linkedin.com/in/rafaelrabelodasilva/)

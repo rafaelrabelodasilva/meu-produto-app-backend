@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { AuthUser } from './types/auth-user.type';
 
 @Controller('auth')
 export class AuthController {
@@ -20,13 +21,13 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getMe(@CurrentUser() user: any) {
+  getMe(@CurrentUser() user: AuthUser) {
     return user;
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@CurrentUser() user: any) {
+  logout(@CurrentUser() user: AuthUser) {
     return this.authService.logout(user.userId);
   }
 }
