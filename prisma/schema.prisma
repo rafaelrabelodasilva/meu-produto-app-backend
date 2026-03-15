@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -12,8 +13,6 @@ model User {
   lastName  String   @map("last_name")
   email     String   @unique
   password  String
-
-  refreshToken String? @map("refresh_token")
   
   // Timestamps fundamentais
   createdAt DateTime @default(now()) @map("created_at")
