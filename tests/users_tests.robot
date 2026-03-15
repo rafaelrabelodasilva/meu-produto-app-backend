@@ -3,7 +3,7 @@ Resource         resources/user_resource.robot
 Library          Collections
 
 *** Test Cases ***
-Cenario: Fluxo CRUD Completo com Limpeza Automatica
+Cenario: Sucesso ao criar e logar um novo usuário
     [Documentation]    Cria, loga e deleta o usuario garantindo que o Teardown limpe o banco.
     [Teardown]       Rodar Limpeza de Usuario Segura
     
@@ -27,7 +27,7 @@ Cenario: Fluxo CRUD Completo com Limpeza Automatica
     Should Be Equal As Integers    ${res_get.status_code}    200
     Should Be Equal As Strings     ${res_get.json()}[email]    ${EMAIL}
 
-Cenario: Validar obrigatoriedade de senha forte
+Cenario: Erro quando a senha não possui os requisitos mínimos
     [Documentation]    Verifica se a lista de mensagens do NestJS contém o erro esperado.
     
     ${res}=          Criar Usuario    Nome    Sobrenome    erro_senha@teste.com    123
@@ -37,7 +37,7 @@ Cenario: Validar obrigatoriedade de senha forte
     ${mensagens}=    Set Variable    ${res.json()}[message]
     List Should Contain Value    ${mensagens}    A senha deve ter no mínimo 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo.
 
-Cenario: Validar erro de e-mail ja cadastrado
+Cenario: Erro ao tentar cadastrar um e-mail já existente
     [Documentation]    Tenta cadastrar o mesmo e-mail duas vezes.
     [Teardown]       Rodar Limpeza de Usuario Segura
 
