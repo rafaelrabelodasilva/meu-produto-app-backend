@@ -1,3 +1,4 @@
+// src/products/products.controller.ts
 import {
   Controller,
   Get,
@@ -9,10 +10,18 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
+export interface AuthenticatedRequest extends Request {
+  user: {
+    userId: string;
+    email: string;
+  };
+}
 
 @Controller('products')
 @UseGuards(JwtAuthGuard)
@@ -20,23 +29,26 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  create(@Req() req, @Body() createProductDto: CreateProductDto) {
+  create(
+    @Req() req: AuthenticatedRequest,
+    @Body() createProductDto: CreateProductDto,
+  ) {
     return this.productsService.create(req.user.userId, createProductDto);
   }
 
   @Get()
-  findAll(@Req() req) {
+  findAll(@Req() req: AuthenticatedRequest) {
     return this.productsService.findAll(req.user.userId);
   }
 
   @Get(':id')
-  findOne(@Req() req, @Param('id') id: string) {
+  findOne(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     return this.productsService.findOne(id, req.user.userId);
   }
 
   @Patch(':id')
   update(
-    @Req() req,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
   ) {
@@ -44,7 +56,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  remove(@Req() req, @Param('id') id: string) {
+  remove(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     return this.productsService.remove(id, req.user.userId);
   }
 }

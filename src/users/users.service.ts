@@ -24,7 +24,7 @@ export class UsersService {
     if (user) {
       throw new HttpException('E-mail já cadastrado', HttpStatus.BAD_REQUEST);
     }
-    
+
     return await this.prismaService.user.create({
       data: {
         ...createUserDto,

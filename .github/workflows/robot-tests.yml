@@ -1,0 +1,71 @@
+name: Robot Framework API Tests
+
+on:
+  push:
+    branches: 
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    # Sobe o PostgreSQL como um serviço para a API
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 1234
+          POSTGRES_DB: meu_produto_app
+        ports:
+          - 5433:5432 # Mapeia a porta para bater com seu .env
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar Dependências da API
+        run: |
+          npm install
+          npx prisma generate
+
+      - name: Instalar Robot Framework
+        run: |
+          pip install robotframework robotframework-requests
+
+      - name: Subir API em Background
+        env:
+          # Sobrescreve a URL do banco para o ambiente do GitHub
+          DATABASE_URL: "postgresql://postgres:1234@localhost:5433/meu_produto_app?schema=public"
+          JWT_SECRET: "sua_secret_de_teste" # Se necessário
+        run: |
+          npm run start & 
+          npx wait-on http://localhost:3000/users --timeout 60000
+
+      - name: Rodar Testes do Robot
+        run: npm run test:api
+
+      - name: Upload de Relatórios (Artifacts)
+        if: always() # Garante que o log seja salvo mesmo se o teste falhar
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-framework-results
+          path: tests/logs/
