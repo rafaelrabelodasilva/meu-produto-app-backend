@@ -1,15 +1,25 @@
 *** Settings ***
 Library    RequestsLibrary
 Library    Collections
+Library    String
 
 *** Variables ***
-${BASE_URL}      http://localhost:3000
-${USER_ENDPOINT}  /users
-${USER_ID_CRIADO}        ${None}
-${HEADERS_AUTORIZACAO}   ${None}
+${BASE_URL}          http://localhost:3000
+${USER_ENDPOINT}     /users
+${LOGIN_ENDPOINT}    /auth/login
+${LOGOUT_ENDPOINT}   /auth/logout
+
+${USER_ID_CRIADO}        ${NONE}
+${HEADERS_AUTORIZACAO}   ${NONE}
+
 
 *** Keywords ***
-Criar Usuario
+Gerar email dinamico
+    ${random}=    Generate Random String    8    [LOWER]
+    ${email}=     Set Variable    teste_${random}@exemplo.com
+    RETURN    ${email}
+
+Cria usuario
     [Arguments]    ${firstName}    ${lastName}    ${email}    ${password}
     ${payload}=    Create Dictionary    
     ...    firstName=${firstName}    
@@ -17,40 +27,32 @@ Criar Usuario
     ...    email=${email}    
     ...    password=${password}
     
-    ${response}=    POST    url=${BASE_URL}${USER_ENDPOINT}    json=${payload}    expected_status=any
+    ${response}=    POST    url=${BASE_URL}${USER_ENDPOINT}    json=${payload}    expected_status=201
     RETURN    ${response}
 
-Obter Token de Acesso
+Obtem token de acesso
     [Arguments]    ${email}    ${password}
     ${payload}=    Create Dictionary    email=${email}    password=${password}
-    # Ajuste o endpoint de login conforme sua implementação de Auth
-    ${response}=   POST    url=${BASE_URL}/auth/login    json=${payload}    expected_status=any
     
-    IF    ${response.status_code} != 201 and ${response.status_code} != 200
-        Fail    Falha ao obter token: ${response.text}
-    END
-
+    ${response}=   POST    url=${BASE_URL}${LOGIN_ENDPOINT}    json=${payload}    expected_status=any
+    
     ${token}=      Set Variable    ${response.json()}[access_token]
     ${headers}=    Create Dictionary    Authorization=Bearer ${token}
     RETURN    ${headers}
 
-Buscar Usuario Por ID
+Busca usuario por id
     [Arguments]    ${user_id}    ${headers}
-    ${response}=    GET    url=${BASE_URL}${USER_ENDPOINT}/${user_id}    headers=${headers}    expected_status=any
+    ${response}=    GET    url=${BASE_URL}${USER_ENDPOINT}/${user_id}    headers=${headers}    expected_status=200
     RETURN    ${response}
 
-Deletar Usuario
-    [Arguments]    ${user_id}    ${headers}
-    ${response}=    DELETE    url=${BASE_URL}${USER_ENDPOINT}/${user_id}    headers=${headers}    expected_status=any
+Faz logout
+    [Arguments]    ${headers}
+    ${response}=   POST    url=${BASE_URL}${LOGOUT_ENDPOINT}    headers=${headers}    expected_status=201
     RETURN    ${response}
 
-Rodar Limpeza de Usuario Segura
-    [Documentation]    Deleta o usuário criado no teste para manter o banco limpo.
-    ${status}    ${val}=    Run Keyword And Ignore Error    Variable Should Exist    ${USER_ID_CRIADO}
-    IF    '${status}' == 'PASS'
-        # Tenta pegar o token se ele ainda não existir para autorizar o delete
-        ${headers_status}    ${headers_val}=    Run Keyword And Ignore Error    Variable Should Exist    ${HEADERS_AUTORIZACAO}
-        IF    '${headers_status}' == 'PASS'
-            Deletar Usuario    ${USER_ID_CRIADO}    ${HEADERS_AUTORIZACAO}
-        END
-    END
+Deleta usuario por id
+    ${existe_user}=    Run Keyword And Return Status    Variable Should Exist    ${USER_ID_CRIADO}
+    ${existe_header}=  Run Keyword And Return Status    Variable Should Exist    ${HEADERS_AUTORIZACAO}
+
+    Run Keyword If    '${existe_user}'=='True' and '${existe_header}'=='True'    DELETE    url=${BASE_URL}${USER_ENDPOINT}/${USER_ID_CRIADO}    headers=${HEADERS_AUTORIZACAO}    expected_status=200
+    ...    ELSE    Log    Usuário ou token de acesso não disponíveis para exclusão.
