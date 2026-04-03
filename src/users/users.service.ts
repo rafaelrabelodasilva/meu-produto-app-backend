@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -65,14 +64,10 @@ export class UsersService {
       return await this.prismaService.user.delete({
         where: { id },
       });
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
+    } catch (error: any) {
+      if (error?.code === 'P2025') {
         throw new NotFoundException(`Usuário ${id} não encontrado`);
       }
-      // Para outros erros
       throw error;
     }
   }
