@@ -57,3 +57,14 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /generated/prisma
 /tests/logs
+
+# BMAD
+_bmad
+_bmad-*
+.gemini
+
+# Uploads
+uploads/*
+
+# Este arquivo existe para garantir que a pasta uploads seja criada no Git, mas vazia.
+!uploads/.gitkeep

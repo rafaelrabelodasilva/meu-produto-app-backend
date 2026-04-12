@@ -9,18 +9,19 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   firstName String   @map("first_name")
-  lastName  String   @map("last_name")  // No código TS: firstName | No DB: first_name
+  lastName  String   @map("last_name")
   email     String   @unique
   password  String
 
   refreshToken String? @map("refresh_token")
 
-  products Product[]
+  products   Product[]
+  categories Category[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("users")  // Define o nome da tabela no PostgreSQL como 'users'
+  @@map("users")
 }
 
 model Product {
@@ -36,10 +37,28 @@ model Product {
   userId String
   user   User @relation(fields: [userId], references: [id])
 
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
   images ProductImage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String
+
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, userId])
 }
 
 model ProductImage {
