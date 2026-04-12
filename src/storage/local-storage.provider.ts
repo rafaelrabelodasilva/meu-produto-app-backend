@@ -37,11 +37,26 @@ export class LocalStorageProvider extends StorageProvider {
 
   async delete(filePath: string): Promise<void> {
     const absolutePath = path.join(this.uploadDir, filePath);
+    const parentDir = path.dirname(absolutePath);
+
     try {
+      // Deletar o arquivo físico
       await fs.unlink(absolutePath);
+
+      // Verificar se a pasta pai (ex: uploads/products/{productId}) ficou vazia
+      // Mas apenas se for uma subpasta (evitar deletar o 'uploads' raiz)
+      if (parentDir !== this.uploadDir) {
+        const files = await fs.readdir(parentDir);
+        if (files.length === 0) {
+          await fs.rmdir(parentDir);
+        }
+      }
     } catch (error) {
-      // If file doesn't exist, we don't care much, but log it if it's something else
-      console.error(`Error deleting file ${absolutePath}:`, error);
+      // Se o arquivo não existir, ignoramos silenciosamente
+      // Caso contrário, logamos o erro (ex: erro de permissão)
+      if (error.code !== 'ENOENT') {
+        console.error(`Erro ao deletar arquivo ou pasta em ${absolutePath}:`, error);
+      }
     }
   }
 }
