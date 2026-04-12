@@ -35,4 +35,12 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   notes?: string;
-}
+
+  @ApiPropertyOptional({ description: 'ID da categoria do produto', example: 'uuid-da-categoria' })
+  @IsOptional()
+  @IsString()
+  categoryId?: string | null;
+  }
+
+
+

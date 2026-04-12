@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -13,7 +13,16 @@ export class ProductsService {
     private storageService: StorageService,
   ) {}
 
-  create(userId: string, data: CreateProductDto) {
+  async create(userId: string, data: CreateProductDto) {
+    if (data.categoryId) {
+      const category = await this.prisma.category.findFirst({
+        where: { id: data.categoryId, userId },
+      });
+      if (!category) {
+        throw new NotFoundException('Categoria não encontrada.');
+      }
+    }
+
     return this.prisma.product.create({
       data: {
         ...data,
@@ -22,6 +31,7 @@ export class ProductsService {
           : undefined,
         userId,
       },
+      include: { category: true },
     });
   }
 
@@ -32,11 +42,13 @@ export class ProductsService {
     const order = query.order || 'desc';
     const search = query.search;
     const brand = query.brand;
+    const categoryId = query.categoryId;
 
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {
       userId,
+      ...(categoryId && { categoryId }),
       ...(brand && { brand: { contains: brand, mode: 'insensitive' } }),
       ...(search && {
         OR: [
@@ -51,7 +63,7 @@ export class ProductsService {
       this.prisma.product.count({ where }),
       this.prisma.product.findMany({
         where,
-        include: { images: true },
+        include: { images: true, category: true },
         skip,
         take: limit,
         orderBy: { [sortBy]: order } as Prisma.ProductOrderByWithRelationInput,
@@ -71,7 +83,7 @@ export class ProductsService {
   async findOne(id: string, userId: string) {
     const product = await this.prisma.product.findFirst({
       where: { id, userId },
-      include: { images: true },
+      include: { images: true, category: true },
     });
 
     if (!product) {
@@ -82,13 +94,21 @@ export class ProductsService {
   }
 
   async update(id: string, userId: string, data: UpdateProductDto) {
-    // Check ownership first
     const product = await this.prisma.product.findFirst({
       where: { id, userId },
     });
 
     if (!product) {
       throw new NotFoundException('Produto não encontrado');
+    }
+
+    if (data.categoryId) {
+      const category = await this.prisma.category.findFirst({
+        where: { id: data.categoryId, userId },
+      });
+      if (!category) {
+        throw new NotFoundException('Categoria não encontrada.');
+      }
     }
 
     return this.prisma.product.update({
@@ -99,7 +119,7 @@ export class ProductsService {
           ? new Date(data.purchaseDate)
           : undefined,
       },
-      include: { images: true },
+      include: { images: true, category: true },
     });
   }
 
@@ -113,14 +133,12 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado');
     }
 
-    // Capture image paths before deletion
     const imagePaths = product.images.map((img) => img.url);
 
     const deleted = await this.prisma.product.delete({
       where: { id },
     });
 
-    // Physical file cleanup
     for (const path of imagePaths) {
       try {
         await this.storageService.deleteFile(path);

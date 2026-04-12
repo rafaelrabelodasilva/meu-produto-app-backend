@@ -78,8 +78,9 @@ export class ProductsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Excluir um produto' })
-  remove(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
-    return this.productsService.remove(id, req.user.userId);
+  async remove(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    await this.productsService.remove(id, req.user.userId);
+    return { message: 'Produto excluído com sucesso.' };
   }
 
   @Post(':id/images')

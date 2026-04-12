@@ -18,6 +18,11 @@ export class FindAllProductsDto {
   @IsString()
   brand?: string;
 
+  @ApiPropertyOptional({ description: 'Filtrar por ID da categoria', example: 'uuid-da-categoria' })
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
   @ApiPropertyOptional({ description: 'Número da página', default: 1 })
   @IsOptional()
   @Type(() => Number)
