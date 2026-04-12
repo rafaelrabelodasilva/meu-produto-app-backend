@@ -3,6 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { StorageService } from '../storage/storage.service';
+import { FindAllProductsDto } from './dto/find-all-products.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductsService {
@@ -23,21 +25,72 @@ export class ProductsService {
     });
   }
 
-  findAll(userId: string) {
-    return this.prisma.product.findMany({
-      where: { userId },
-      include: { images: true },
-    });
+  async findAll(userId: string, query: FindAllProductsDto) {
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const sortBy = query.sortBy || 'createdAt';
+    const order = query.order || 'desc';
+    const search = query.search;
+    const brand = query.brand;
+
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.ProductWhereInput = {
+      userId,
+      ...(brand && { brand: { contains: brand, mode: 'insensitive' } }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { brand: { contains: search, mode: 'insensitive' } },
+          { model: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
+    };
+
+    const [total, items] = await Promise.all([
+      this.prisma.product.count({ where }),
+      this.prisma.product.findMany({
+        where,
+        include: { images: true },
+        skip,
+        take: limit,
+        orderBy: { [sortBy]: order } as Prisma.ProductOrderByWithRelationInput,
+      }),
+    ]);
+
+    return {
+      data: items,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit),
+      },
+    };
   }
 
-  findOne(id: string, userId: string) {
-    return this.prisma.product.findFirst({
+  async findOne(id: string, userId: string) {
+    const product = await this.prisma.product.findFirst({
       where: { id, userId },
       include: { images: true },
     });
+
+    if (!product) {
+      throw new NotFoundException('Produto não encontrado');
+    }
+
+    return product;
   }
 
-  update(id: string, userId: string, data: UpdateProductDto) {
+  async update(id: string, userId: string, data: UpdateProductDto) {
+    // Check ownership first
+    const product = await this.prisma.product.findFirst({
+      where: { id, userId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Produto não encontrado');
+    }
+
     return this.prisma.product.update({
       where: { id },
       data: {
@@ -69,7 +122,11 @@ export class ProductsService {
 
     // Physical file cleanup
     for (const path of imagePaths) {
-      await this.storageService.deleteFile(path);
+      try {
+        await this.storageService.deleteFile(path);
+      } catch (error) {
+        console.error(`Falha ao excluir arquivo físico: ${path}`, error);
+      }
     }
 
     return deleted;

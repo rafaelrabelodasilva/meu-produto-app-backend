@@ -9,6 +9,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
   UseInterceptors,
   UploadedFiles,
   UploadedFile,
@@ -21,6 +22,7 @@ import { Request } from 'express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FindAllProductsDto } from './dto/find-all-products.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
@@ -50,9 +52,12 @@ export class ProductsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os produtos do usuário autenticado' })
-  findAll(@Req() req: AuthenticatedRequest) {
-    return this.productsService.findAll(req.user.userId);
+  @ApiOperation({ summary: 'Listar produtos com busca, paginação e ordenação' })
+  findAll(
+    @Req() req: AuthenticatedRequest,
+    @Query() query: FindAllProductsDto,
+  ) {
+    return this.productsService.findAll(req.user.userId, query);
   }
 
   @Get(':id')
