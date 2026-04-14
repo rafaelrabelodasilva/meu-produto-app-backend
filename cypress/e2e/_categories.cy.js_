@@ -1,0 +1,128 @@
+describe('Categories', () => {
+
+  it('listCategories', () => {
+    cy.request({
+      method: 'GET',
+      url: 'http://localhost:3000/categories',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('updateCategory', () => {
+    cy.request({
+      method: 'PATCH',
+      url: 'http://localhost:3000/categories/ceedc303-40d5-4c7c-b78a-405cafee9c16',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}`, // Use stored token
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "name": "Patrimônio"
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('deleteCategory', () => {
+    cy.request({
+      method: 'DELETE',
+      url: 'http://localhost:3000/categories/8c558ed7-d351-4111-9c0d-36f488003e5c',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(204);
+      // console.log(response.body);
+    });
+  });
+
+  it('assignCategoryToProduct', () => {
+    // Using hardcoded IDs as per original curl. Ideally these should be dynamic.
+    const productId = '1ca40d7c-6eac-4762-8365-c4b0e84f02c5';
+    const categoryId = 'e1b57aa7-ca57-4048-88cc-8a25ffea40a3';
+    cy.request({
+      method: 'PATCH',
+      url: `http://localhost:3000/products/${productId}`,
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}`, // Use stored token
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "categoryId": categoryId
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('unassignCategoryFromProduct', () => {
+    // Using hardcoded IDs as per original curl. Ideally these should be dynamic.
+    const productId = 'd0088f74-fb3a-4ff4-a66d-2a9bb3d52039';
+    cy.request({
+      method: 'PATCH',
+      url: `http://localhost:3000/products/${productId}`,
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}`, // Use stored token
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "categoryId": null
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('createProductWithCategory', () => {
+    // Using hardcoded category ID. Ideally this should be dynamic.
+    const categoryId = 'e1b57aa7-ca57-4048-88cc-8a25ffea40a3';
+    cy.request({
+      method: 'POST',
+      url: 'http://localhost:3000/products',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}`, // Use stored token
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "name": "Teste",
+        "brand": "Redragon",
+        "model": "PRO",
+        "size": "Standard",
+        "purchaseDate": "2025-10-15",
+        "price": 500.99,
+        "notes": "Comprei na magazine luiza",
+        "categoryId": categoryId
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(201);
+      // console.log(response.body);
+    });
+  });
+
+  it('createCategory', () => {
+    cy.request({
+      method: 'POST',
+      url: 'http://localhost:3000/categories',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}`, // Use stored token
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "name": "PC"
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(201);
+      // console.log(response.body);
+    });
+  });
+
+});

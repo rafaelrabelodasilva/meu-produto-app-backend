@@ -10,7 +10,7 @@ const getAuthHeaders = (email, password) => {
   let headers = null;
 
   // Tenta fazer login
-  cy.request({
+  cy.api({
     method: 'POST',
     url: `${BASE_URL}${AUTH_ENDPOINT}/login`,
     body: { email: email, password: password },
@@ -42,7 +42,7 @@ const createUser = (firstName, lastName, email, password) => {
   };
   let userId = null;
   
-  cy.request({
+  cy.api({
     method: 'POST',
     url: `${BASE_URL}${USERS_ENDPOINT}`,
     body: userPayload,
@@ -62,7 +62,7 @@ const createUser = (firstName, lastName, email, password) => {
 // Função auxiliar para limpar usuário (inspirada em user_resource.robot)
 const cleanupUser = (userId, authHeaders) => {
   if (userId && authHeaders) {
-    cy.request({
+    cy.api({
       method: 'DELETE',
       url: `${BASE_URL}${USERS_ENDPOINT}/${userId}`,
       headers: authHeaders,
@@ -120,7 +120,7 @@ describe('Auth API Tests', () => {
     });
 
     // 2. Tentar Login
-    cy.request({
+    cy.api({
       method: 'POST',
       url: `${BASE_URL}${AUTH_ENDPOINT}/login`,
       body: { email: EMAIL, password: SENHA },
@@ -134,7 +134,7 @@ describe('Auth API Tests', () => {
       cy.wrap(createdUserId).as('createdUserId'); // Garante que o alias esteja atualizado
 
       // 3. Validar acesso à rota protegida /auth/me
-      cy.request({
+      cy.api({
         method: 'GET',
         url: `${BASE_URL}${AUTH_ENDPOINT}/me`,
         headers: authHeaders,
@@ -160,7 +160,7 @@ describe('Auth API Tests', () => {
     });
 
     // Tentar Login com senha errada
-    cy.request({
+    cy.api({
       method: 'POST',
       url: `${BASE_URL}${AUTH_ENDPOINT}/login`,
       body: { email: EMAIL, password: SENHA_ERRADA },
@@ -179,7 +179,7 @@ describe('Auth API Tests', () => {
     const EMAIL_NAO_EXISTE = 'nao_existe@teste.com';
     const SENHA_QUALQUER = 'QualquerSenha123';
 
-    cy.request({
+    cy.api({
       method: 'POST',
       url: `${BASE_URL}${AUTH_ENDPOINT}/login`,
       body: { email: EMAIL_NAO_EXISTE, password: SENHA_QUALQUER },

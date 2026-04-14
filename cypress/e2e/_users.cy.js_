@@ -1,0 +1,83 @@
+import { expect } from 'chai';
+
+describe('Users', () => {
+
+  it('listUsers', () => {
+    cy.request({
+      method: 'GET',
+      url: 'http://localhost:3000/users',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('getUserById', () => {
+    cy.request({
+      method: 'GET',
+      url: 'http://localhost:3000/users/04476cbb-828a-4d6d-8fdd-a54d3dfee6e',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('createUser', () => {
+    cy.request({
+      method: 'POST',
+      url: 'http://localhost:3000/users',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "firstName": "Rafael",
+        "lastName": "Rabelo",
+        "email": "rafael@email.com",
+        "password": "Teste@1234"
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(201);
+      // console.log(response.body);
+    });
+  });
+
+  it('updateUser', () => {
+    cy.request({
+      method: 'PATCH',
+      url: 'http://localhost:3000/users/8c8a8f50-a980-437b-8788-cd41eaee67b0',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}`, // Use stored token
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "firstName": "Roberto",
+        "lastName": "Rabelo",
+        "email": "rafaelrabelo@email.com",
+        "password": "Teste@1234"
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('deleteUser', () => {
+    cy.request({
+      method: 'DELETE',
+      url: 'http://localhost:3000/users/40a1a94b-7bef-45e7-9081-a0ef3af30137',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(204);
+      // console.log(response.body);
+    });
+  });
+
+});

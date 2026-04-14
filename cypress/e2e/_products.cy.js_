@@ -1,0 +1,228 @@
+import { expect } from 'chai';
+
+describe('Products', () => {
+
+  it('createProduct', () => {
+    cy.request({
+      method: 'POST',
+      url: 'http://localhost:3000/products',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}`, // Use stored token
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "name": "Ipad",
+        "brand": "Apple",
+        "model": "PRO M4",
+        "size": "11",
+        "purchaseDate": "2025-03-10",
+        "price": 6500.99,
+        "notes": "Comprei na Shopee"
+      },
+    }).then(response => {
+      expect(response.status).to.eq(201); // Assuming 201 Created
+      expect(response.body).to.have.property('id');
+      const productId = response.body.id;
+      cy.log('Created product with ID:', productId);
+      Cypress.env('createdProductId', productId); // Store the product ID
+    });
+  });
+
+  it('listProducts', () => {
+    cy.request({
+      method: 'GET',
+      url: 'http://localhost:3000/products',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('getProductById', () => {
+    // Ensure createdProductId is set before this test runs
+    cy.get('body').then(() => { // Using cy.get('body').then() to ensure Cypress context is ready
+      const productId = Cypress.env('createdProductId');
+      if (!productId) {
+        throw new Error("Product ID not found. Ensure 'createProduct' ran successfully and stored the ID.");
+      }
+      cy.request({
+        method: 'GET',
+        url: `http://localhost:3000/products/${productId}`, // Use dynamic product ID
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+        },
+      }).then(response => {
+        // expect(response.status).to.eq(200);
+        // console.log(response.body);
+      });
+    });
+  });
+
+  it('updateProduct', () => {
+    // Using hardcoded ID as per original curl. For consistency, ideally use dynamic ID from createProduct.
+    const productIdToUpdate = '774c4e3b-97a8-4304-a4d5-c3c656eb623c'; // Keeping hardcoded as per original curl for now
+    cy.request({
+      method: 'PATCH',
+      url: `http://localhost:3000/products/${productIdToUpdate}`,
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}`, // Use stored token
+        'Content-Type': 'application/json'
+      },
+      body: {
+        "name": "Iphone",
+        "brand": "Apple",
+        "model": "13 PRO MAX",
+        "size": "Max",
+        "purchaseDate": "2020-03-10",
+        "price": 6500.99,
+        "notes": "Daqui a pouco dá defeito"
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('deleteProduct', () => {
+    cy.get('body').then(() => {
+      const productId = Cypress.env('createdProductId');
+      if (!productId) {
+        throw new Error("Product ID not found. Ensure 'createProduct' ran successfully and stored the ID.");
+      }
+      cy.request({
+        method: 'DELETE',
+        url: `http://localhost:3000/products/${productId}`, // Use dynamic product ID
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+        },
+      }).then(response => {
+        // expect(response.status).to.eq(204);
+        // console.log(response.body);
+      });
+    });
+  });
+
+  it('uploadProductImages', () => {
+    cy.get('body').then(() => {
+      const productId = Cypress.env('createdProductId');
+      if (!productId) {
+        throw new Error("Product ID not found. Ensure 'createProduct' ran successfully and stored the ID.");
+      }
+      cy.request({
+        method: 'POST',
+        url: `http://localhost:3000/products/${productId}/images`, // Use dynamic product ID
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+        },
+        form: {
+          'files': '@fixtures/arquitetura-kubernetes.png', // Adjusted path to cypress/fixtures/
+          'files': '@fixtures/1288642.jpg' // Adjusted path to cypress/fixtures/
+        },
+      }).then(response => {
+        // expect(response.status).to.eq(201);
+        // console.log(response.body);
+      });
+    });
+  });
+
+  it('updateProductImage', () => {
+    cy.get('body').then(() => {
+      const productId = Cypress.env('createdProductId');
+      if (!productId) {
+        throw new Error("Product ID not found. Ensure 'createProduct' ran successfully and stored the ID.");
+      }
+      // Using hardcoded image ID as per original curl. Ideally, this would be dynamic.
+      const imageId = 'e4b821df-a0c8-4f28-be60-25d425cf05a0';
+      cy.request({
+        method: 'PATCH',
+        url: `http://localhost:3000/products/${productId}/images/${imageId}`, // Use dynamic product ID, hardcoded image ID
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+        },
+        form: {
+          'file': '@fixtures/Gemini_Generated_Image_wdguqqwdguqqwdgu.png' // Adjusted path to cypress/fixtures/
+        },
+      }).then(response => {
+        // expect(response.status).to.eq(200);
+        // console.log(response.body);
+      });
+    });
+  });
+
+  it('deleteProductImage', () => {
+    cy.get('body').then(() => {
+      const productId = Cypress.env('createdProductId');
+      if (!productId) {
+        throw new Error("Product ID not found. Ensure 'createProduct' ran successfully and stored the ID.");
+      }
+      // Using hardcoded image ID as per original curl. Ideally, this would be dynamic.
+      const imageId = 'e4b821df-a0c8-4f28-be60-25d425cf05a';
+      cy.request({
+        method: 'DELETE',
+        url: `http://localhost:3000/products/${productId}/images/${imageId}`, // Use dynamic product ID, hardcoded image ID
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+        },
+      }).then(response => {
+        // expect(response.status).to.eq(204);
+        // console.log(response.body);
+      });
+    });
+  });
+
+  it('listProductsPaginated', () => {
+    cy.request({
+      method: 'GET',
+      url: 'http://localhost:3000/products?page=1&limit=2',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('searchProducts', () => {
+    cy.request({
+      method: 'GET',
+      url: 'http://localhost:3000/products?search=macb',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('sortProducts', () => {
+    cy.request({
+      method: 'GET',
+      url: 'http://localhost:3000/products?sortBy=price&order=desc',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+  it('filterProductsByBrand', () => {
+    cy.request({
+      method: 'GET',
+      url: 'http://localhost:3000/products?brand=samsung&limit=5&page=1',
+      headers: {
+        'Authorization': `Bearer ${Cypress.env('authToken')}` // Use stored token
+      },
+    }).then(response => {
+      // expect(response.status).to.eq(200);
+      // console.log(response.body);
+    });
+  });
+
+});
