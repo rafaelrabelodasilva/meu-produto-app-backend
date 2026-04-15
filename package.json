@@ -5,6 +5,9 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -18,7 +21,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "test:api": "robot -d ./tests/logs ./tests/*.robot"
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "cypress:open": "npx cypress open",
+    "cypress:run": "npx cypress run --browser electron --headless"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

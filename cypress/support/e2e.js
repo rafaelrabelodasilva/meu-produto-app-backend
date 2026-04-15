@@ -17,3 +17,8 @@
 require('./commands');
 require('cypress-plugin-api');
 require('cypress-mochawesome-reporter/register');
+
+before(() => {
+  // Garante o estado inicial do banco antes de qualquer teste
+  cy.garantirUsuarioAutomacao();
+});
