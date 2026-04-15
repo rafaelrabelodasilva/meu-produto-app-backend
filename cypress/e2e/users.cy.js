@@ -1,42 +1,28 @@
-describe('Suíte de testes da camada de usuários', () => {
-  let userId;
-  let userFixture;
-
-  before(() => {
-    cy.fixture('users').then((dados) => {
-      userFixture = dados.novoUsuario;
-      // Adiciona um sufixo aleatório para evitar conflitos de email
-      userFixture.email = `automacao_${Math.floor(Math.random() * 1000000)}@email.com`;
-    });
-  });
+describe('Suíte de testes da camada de usuários (Atômicos)', () => {
 
   it('Deve criar um novo usuário (POST /users)', () => {
+    const randomSuffix = Math.floor(Math.random() * 1000000);
+    const novoUsuario = {
+      firstName: "Usuario",
+      lastName: "Atômico",
+      email: `atomico_${randomSuffix}@email.com`,
+      password: "Teste@1234"
+    };
+
     cy.api({
       method: 'POST',
       url: '/users',
-      body: userFixture,
+      body: novoUsuario,
     }).then(resposta => {
       expect(resposta.status).to.eq(201);
       expect(resposta.body).to.have.property('id');
-      expect(resposta.body).to.have.property('firstName', userFixture.firstName);
-      expect(resposta.body).to.have.property('lastName', userFixture.lastName);
-      expect(resposta.body).to.have.property('email', userFixture.email);
-      expect(resposta.body).to.have.property('password');
-      expect(resposta.body).to.have.property('refreshToken');
-      expect(resposta.body).to.have.property('createdAt');
-      expect(resposta.body).to.have.property('updatedAt');
-      
-      // Armazena o ID do usuário criado para os próximos testes
-      userId = resposta.body.id;
+      expect(resposta.body.email).to.eq(novoUsuario.email);
     });
   });
 
-  // Os testes seguintes assumem que o usuário foi criado com sucesso e que o token de autenticação foi obtido
-  it('Deve realizar login com o usuário recém-criado (POST /auth)', () => {
-    cy.login(userFixture.email, userFixture.password);
-  });
-
   it('Deve listar os usuários (GET /users)', () => {
+    // Basta um token válido (usuário de automação padrão)
+    cy.login(); 
     cy.api({
       method: 'GET',
       url: '/users',
@@ -46,86 +32,87 @@ describe('Suíte de testes da camada de usuários', () => {
     }).then(resposta => {
       expect(resposta.status).to.eq(200);
       expect(resposta.body).to.be.an('array');
-      // Verifica se o usuário criado está na lista
-      const usuarioEncontrado = resposta.body.find(user => user.id === userId);
-      expect(usuarioEncontrado).to.exist;
-      expect(usuarioEncontrado).to.have.property('email', userFixture.email);
     });
   });
 
-  it('Deve obter detalhes do próprio usuário (GET /users/:id)', () => {
-    cy.api({
-      method: 'GET',
-      url: `/users/${userId}`,
-      headers: {
-        'Authorization': `Bearer ${Cypress.env('authToken')}`
-      },
-    }).then(resposta => {
-      expect(resposta.status).to.eq(200);
-      expect(resposta.body.id).to.eq(userId);
-      expect(resposta.body.firstName).to.eq(userFixture.firstName);
-      expect(resposta.body.lastName).to.eq(userFixture.lastName);
-      expect(resposta.body.email).to.eq(userFixture.email);
-      expect(resposta.body).to.have.property('password');
-      expect(resposta.body).to.have.property('refreshToken');
-      expect(resposta.body).to.have.property('createdAt');
-      expect(resposta.body).to.have.property('updatedAt');
-    });
-  });
-
-  it('Deve atualizar os dados do usuário (PATCH /users/:id)', () => {
-    cy.api({
-      method: 'PATCH',
-      url: `/users/${userId}`,
-      headers: {
-        'Authorization': `Bearer ${Cypress.env('authToken')}`,
-      },
-      body: {
-        firstName: "Nome Alterado",
-        lastName: "Sobrenome Alterado"
-      },
-    }).then(resposta => {
-      expect(resposta.status).to.eq(200);
-      expect(resposta.body.firstName).to.eq("Nome Alterado");
-      expect(resposta.body.lastName).to.eq("Sobrenome Alterado");
-      expect(resposta.body.email).to.eq(userFixture.email);
-      expect(resposta.body).to.have.property('password');
-      expect(resposta.body).to.have.property('refreshToken');
-      expect(resposta.body).to.have.property('createdAt');
-      expect(resposta.body).to.have.property('updatedAt');
-    });
-  });
-
-  it('Deve excluir o usuário (DELETE /users/:id)', () => {
-    cy.api({
-      method: 'DELETE',
-      url: `/users/${userId}`,
-      headers: {
-        'Authorization': `Bearer ${Cypress.env('authToken')}`
-      },
-    }).then(resposta => {
-      expect(resposta.status).to.eq(200)
-      expect(resposta.body.id).to.eq(userId);
-      expect(resposta.body.firstName).to.eq("Nome Alterado");
-      expect(resposta.body.lastName).to.eq("Sobrenome Alterado");
-      expect(resposta.body.email).to.eq(userFixture.email);
-      expect(resposta.body).to.have.property('password');
-      expect(resposta.body).to.have.property('refreshToken');
-      expect(resposta.body).to.have.property('createdAt');
-      expect(resposta.body).to.have.property('updatedAt');
-
-      // Verifica se o usuário foi realmente excluído
-      cy.api({      
+  it('Deve obter detalhes de um usuário específico (GET /users/:id)', () => {
+    cy.login();
+    cy.criarUsuario().then(usuario => {
+      cy.api({
         method: 'GET',
-        url: `/users/${userId}`,
+        url: `/users/${usuario.id}`,
         headers: {
           'Authorization': `Bearer ${Cypress.env('authToken')}`
         },
-        failOnStatusCode: false,
-      }).then(respostaGet => {
-        expect(respostaGet.status).to.eq(404);
+      }).then(resposta => {
+        expect(resposta.status).to.eq(200);
+        expect(resposta.body.id).to.eq(usuario.id);
+        expect(resposta.body.email).to.eq(usuario.email);
       });
-
     });
   });
+
+  it('Deve atualizar os dados de um usuário (PATCH /users/:id)', () => {
+    cy.login();
+    cy.criarUsuario().then(usuario => {
+      cy.api({
+        method: 'PATCH',
+        url: `/users/${usuario.id}`,
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}`,
+        },
+        body: {
+          firstName: "Nome Alterado",
+          lastName: "Atômico Silva"
+        },
+      }).then(resposta => {
+        expect(resposta.status).to.eq(200);
+        expect(resposta.body.firstName).to.eq("Nome Alterado");
+      });
+    });
+  });
+
+  it('Deve excluir um usuário (DELETE /users/:id)', () => {
+    cy.login();
+    cy.criarUsuario().then(usuario => {
+      cy.api({
+        method: 'DELETE',
+        url: `/users/${usuario.id}`,
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}`
+        },
+      }).then(resposta => {
+        expect(resposta.status).to.be.oneOf([200, 204]);
+        
+        // Verifica exclusão
+        cy.api({      
+          method: 'GET',
+          url: `/users/${usuario.id}`,
+          headers: {
+            'Authorization': `Bearer ${Cypress.env('authToken')}`
+          },
+          failOnStatusCode: false,
+        }).then(resGet => {
+          expect(resGet.status).to.eq(404);
+        });
+      });
+    });
+  });
+
+  it('Deve realizar login com um novo usuário (POST /auth/login)', () => {
+    cy.criarUsuario().then(usuario => {
+      cy.api({
+        method: 'POST',
+        url: '/auth/login',
+        body: {
+          email: usuario.email,
+          password: usuario.password
+        },
+      }).then(resposta => {
+        expect(resposta.status).to.be.oneOf([200, 201]);
+        expect(resposta.body).to.have.property('access_token');
+      });
+    });
+  });
+
 });

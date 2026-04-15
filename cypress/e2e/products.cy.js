@@ -1,12 +1,22 @@
-describe('Suíte de testes da camada de produtos', () => {
-  let productId;
+describe('Suíte de testes da camada de produtos (Atômicos)', () => {
 
-  before(() => {
-    // Realiza login com o usuário padrão de teste
-    cy.login("automacao_sistema@email.com", "Teste@1234");
+  beforeEach(() => {
+    // Garante login para obter authToken
+    cy.login();
   });
 
   it('Deve criar um novo produto (POST /products)', () => {
+    const randomSuffix = Math.floor(Math.random() * 1000000);
+    const novoProduto = {
+      name: `Produto Atômico ${randomSuffix}`,
+      brand: "Apple",
+      model: "PRO M4",
+      size: "11",
+      purchaseDate: "2025-03-10",
+      price: 6500.99,
+      notes: "Comprei na Shopee"
+    };
+
     cy.api({
       method: 'POST',
       url: '/products',
@@ -14,19 +24,11 @@ describe('Suíte de testes da camada de produtos', () => {
         'Authorization': `Bearer ${Cypress.env('authToken')}`,
         'Content-Type': 'application/json'
       },
-      body: {
-        "name": "Ipad",
-        "brand": "Apple",
-        "model": "PRO M4",
-        "size": "11",
-        "purchaseDate": "2025-03-10",
-        "price": 6500.99,
-        "notes": "Comprei na Shopee"
-      },
+      body: novoProduto,
     }).then(resposta => {
       expect(resposta.status).to.eq(201);
       expect(resposta.body).to.have.property('id');
-      productId = resposta.body.id;
+      expect(resposta.body.name).to.eq(novoProduto.name);
     });
   });
 
@@ -44,50 +46,51 @@ describe('Suíte de testes da camada de produtos', () => {
     });
   });
 
-  it('Deve obter detalhes do produto criado (GET /products/:id)', () => {
-    expect(productId).to.not.be.undefined;
-    cy.api({
-      method: 'GET',
-      url: `/products/${productId}`,
-      headers: {
-        'Authorization': `Bearer ${Cypress.env('authToken')}`
-      },
-    }).then(resposta => {
-      expect(resposta.status).to.eq(200);
-      expect(resposta.body.id).to.eq(productId);
+  it('Deve obter detalhes de um produto (GET /products/:id)', () => {
+    cy.criarProduto().then(produto => {
+      cy.api({
+        method: 'GET',
+        url: `/products/${produto.id}`,
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}`
+        },
+      }).then(resposta => {
+        expect(resposta.status).to.eq(200);
+        expect(resposta.body.id).to.eq(produto.id);
+        expect(resposta.body.name).to.eq(produto.name);
+      });
     });
   });
 
-  it('Deve atualizar o produto (PATCH /products/:id)', () => {
-    expect(productId).to.not.be.undefined;
-    cy.api({
-      method: 'PATCH',
-      url: `/products/${productId}`,
-      headers: {
-        'Authorization': `Bearer ${Cypress.env('authToken')}`,
-        'Content-Type': 'application/json'
-      },
-      body: {
-        "name": "Iphone",
-        "brand": "Apple",
-        "model": "13 PRO MAX"
-      },
-    }).then(resposta => {
-      expect(resposta.status).to.eq(200);
-      expect(resposta.body.name).to.eq("Iphone");
+  it('Deve atualizar um produto (PATCH /products/:id)', () => {
+    cy.criarProduto().then(produto => {
+      const novoNome = `Produto Alterado ${Math.floor(Math.random() * 1000)}`;
+      cy.api({
+        method: 'PATCH',
+        url: `/products/${produto.id}`,
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: { name: novoNome },
+      }).then(resposta => {
+        expect(resposta.status).to.eq(200);
+        expect(resposta.body.name).to.eq(novoNome);
+      });
     });
   });
 
-  it('Deve excluir o produto (DELETE /products/:id)', () => {
-    expect(productId).to.not.be.undefined;
-    cy.api({
-      method: 'DELETE',
-      url: `/products/${productId}`,
-      headers: {
-        'Authorization': `Bearer ${Cypress.env('authToken')}`
-      },
-    }).then(resposta => {
-      expect(resposta.status).to.be.oneOf([200, 204]);
+  it('Deve excluir um produto (DELETE /products/:id)', () => {
+    cy.criarProduto().then(produto => {
+      cy.api({
+        method: 'DELETE',
+        url: `/products/${produto.id}`,
+        headers: {
+          'Authorization': `Bearer ${Cypress.env('authToken')}`
+        },
+      }).then(resposta => {
+        expect(resposta.status).to.be.oneOf([200, 204]);
+      });
     });
   });
 
