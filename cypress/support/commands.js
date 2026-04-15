@@ -1,10 +1,11 @@
+const { faker } = require('@faker-js/faker');
+
 // Comandos de Criação para Atomização
 Cypress.Commands.add('criarUsuario', (overrides = {}) => {
-  const randomSuffix = Math.floor(Math.random() * 1000000);
   const user = {
-    firstName: "Teste",
-    lastName: "Automacao",
-    email: `automacao_${randomSuffix}@email.com`,
+    firstName: faker.person.firstName(),
+    lastName: faker.person.lastName(),
+    email: faker.internet.email().toLowerCase(),
     password: "Teste@1234",
     ...overrides
   };
@@ -20,9 +21,8 @@ Cypress.Commands.add('criarUsuario', (overrides = {}) => {
 });
 
 Cypress.Commands.add('criarCategoria', (overrides = {}) => {
-  const randomSuffix = Math.floor(Math.random() * 1000000);
   const category = {
-    name: `Categoria ${randomSuffix}`,
+    name: faker.commerce.department(),
     ...overrides
   };
 
@@ -40,11 +40,10 @@ Cypress.Commands.add('criarCategoria', (overrides = {}) => {
 });
 
 Cypress.Commands.add('criarProduto', (overrides = {}) => {
-  const randomSuffix = Math.floor(Math.random() * 1000000);
   const product = {
-    name: `Produto ${randomSuffix}`,
-    brand: "Marca Automacao",
-    model: "Modelo X",
+    name: faker.commerce.productName(),
+    brand: faker.company.name(),
+    model: faker.commerce.productMaterial(),
     ...overrides
   };
 

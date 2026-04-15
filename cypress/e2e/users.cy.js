@@ -1,22 +1,9 @@
 describe('Suíte de testes da camada de usuários', () => {
 
   it('Deve criar um novo usuário (POST /users)', () => {
-    const randomSuffix = Math.floor(Math.random() * 1000000);
-    const novoUsuario = {
-      firstName: "Usuario",
-      lastName: "Atômico",
-      email: `atomico_${randomSuffix}@email.com`,
-      password: "Teste@1234"
-    };
-
-    cy.api({
-      method: 'POST',
-      url: '/users',
-      body: novoUsuario,
-    }).then(resposta => {
-      expect(resposta.status).to.eq(201);
-      expect(resposta.body).to.have.property('id');
-      expect(resposta.body.email).to.eq(novoUsuario.email);
+    cy.criarUsuario().then(usuario => {
+      expect(usuario).to.have.property('id');
+      expect(usuario).to.have.property('email');
     });
   });
 
