@@ -42,7 +42,11 @@ jobs:
         run: |
           npm install
           npx prisma generate
+          echo "--- Verificando status das migrações Prisma ---"
+          npx prisma migrate status
+          echo "--- Aplicando migrações Prisma ---"
           npx prisma migrate deploy
+          echo "--- Migrações Prisma aplicadas ---"
 
       - name: Subir API em Background
         env:
