@@ -1,4 +1,4 @@
-describe('Suíte de testes da camada de usuários (Atômicos)', () => {
+describe('Suíte de testes da camada de usuários', () => {
 
   it('Deve criar um novo usuário (POST /users)', () => {
     const randomSuffix = Math.floor(Math.random() * 1000000);

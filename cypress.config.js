@@ -16,7 +16,7 @@ module.exports = defineConfig({
     experimentalRunAllSpecs: true,
     setupNodeEvents(on, config) {
       require('cypress-mochawesome-reporter/plugin')(on);
-
+      
       // Task para interagir com o banco de dados
       on('task', {
         async queryDb(sql) {

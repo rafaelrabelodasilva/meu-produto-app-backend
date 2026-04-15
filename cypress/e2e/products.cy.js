@@ -1,4 +1,4 @@
-describe('Suíte de testes da camada de produtos (Atômicos)', () => {
+describe('Suíte de testes da camada de produtos', () => {
 
   beforeEach(() => {
     // Garante login para obter authToken

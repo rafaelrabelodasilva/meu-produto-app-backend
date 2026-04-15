@@ -1,4 +1,4 @@
-describe('Suíte de testes da camada de categorias (Atômicos)', () => {
+describe('Suíte de testes da camada de categorias', () => {
 
   beforeEach(() => {
     // Garante login para todos os testes que precisam de authToken
