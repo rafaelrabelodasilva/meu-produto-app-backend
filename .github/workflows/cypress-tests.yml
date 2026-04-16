@@ -37,8 +37,6 @@ jobs:
           cache: 'npm'
 
       - name: Instalar Dependências e Preparar Banco
-        env:
-          DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
         run: |
           npm install
           npx prisma generate
@@ -47,6 +45,8 @@ jobs:
           echo "--- Semeando banco de dados ---"
           npx prisma db seed
           echo "--- Banco preparado ---"
+        env:
+          DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
 
       - name: Subir API em Background
         env:
