@@ -44,6 +44,8 @@ jobs:
           npx prisma generate
           echo "--- Sincronizando banco com Prisma DB Push ---"
           npx prisma db push
+          echo "--- Semeando banco de dados ---"
+          npx prisma db seed
           echo "--- Banco preparado ---"
 
       - name: Subir API em Background
