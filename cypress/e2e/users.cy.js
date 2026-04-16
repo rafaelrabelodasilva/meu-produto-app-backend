@@ -1,5 +1,9 @@
 describe('Suíte de testes da camada de usuários', () => {
 
+  beforeEach(() => {
+    cy.login();
+  });
+
   it('Deve criar um novo usuário (POST /users)', () => {
     cy.criarUsuario().then(usuario => {
       expect(usuario).to.have.property('id');
@@ -8,8 +12,6 @@ describe('Suíte de testes da camada de usuários', () => {
   });
 
   it('Deve listar os usuários (GET /users)', () => {
-    // Basta um token válido (usuário de automação padrão)
-    cy.login(); 
     cy.api({
       method: 'GET',
       url: '/users',
@@ -23,7 +25,6 @@ describe('Suíte de testes da camada de usuários', () => {
   });
 
   it('Deve obter detalhes de um usuário específico (GET /users/:id)', () => {
-    cy.login();
     cy.criarUsuario().then(usuario => {
       cy.api({
         method: 'GET',
@@ -40,7 +41,6 @@ describe('Suíte de testes da camada de usuários', () => {
   });
 
   it('Deve atualizar os dados de um usuário (PATCH /users/:id)', () => {
-    cy.login();
     cy.criarUsuario().then(usuario => {
       cy.api({
         method: 'PATCH',
@@ -60,7 +60,6 @@ describe('Suíte de testes da camada de usuários', () => {
   });
 
   it('Deve excluir um usuário (DELETE /users/:id)', () => {
-    cy.login();
     cy.criarUsuario().then(usuario => {
       cy.api({
         method: 'DELETE',

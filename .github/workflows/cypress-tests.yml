@@ -47,11 +47,12 @@ jobs:
           echo "--- Banco preparado ---"
         env:
           DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
+          JWT_SECRET: "secret_padrao_ci"
 
       - name: Subir API em Background
         env:
           DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
-          JWT_SECRET: "sua_secret_de_teste"
+          JWT_SECRET: "secret_padrao_ci"
         run: |
           npm run start &
           npx wait-on http://localhost:3000/ --timeout 90000 
@@ -59,6 +60,7 @@ jobs:
       - name: Rodar Testes do Cypress
         env:
           DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
+          JWT_SECRET: "secret_padrao_ci"
         run: npm run cypress:run
 
       - name: Upload de Relatórios (Cypress)

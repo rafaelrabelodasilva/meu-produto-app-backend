@@ -1,13 +1,14 @@
 describe('Suíte de testes da camada de autenticação', () => {
   let dadosAutenticacao;
-  let config;
+  let usuarioTeste;
 
   before(() => {
     cy.fixture('auth').then((dados) => {
       dadosAutenticacao = dados;
     });
-    cy.fixture('config').then((dados) => {
-      config = dados;
+    // Cria um usuário novo para garantir que ele existe no ambiente atual
+    cy.criarUsuario().then((user) => {
+      usuarioTeste = user;
     });
   });
 
@@ -15,7 +16,10 @@ describe('Suíte de testes da camada de autenticação', () => {
     cy.api({
       method: 'POST',
       url: '/auth/login',
-      body: config.automacao,
+      body: {
+        email: usuarioTeste.email,
+        password: usuarioTeste.password
+      },
     }).then((resposta) => {
       expect(resposta.status).to.be.oneOf([200, 201]);
       expect(resposta.body).to.have.property('access_token');
@@ -24,7 +28,7 @@ describe('Suíte de testes da camada de autenticação', () => {
   });
 
   it('Sucesso ao obter informações do usuário (GET /auth/me)', () => {
-    cy.login().then(() => {
+    cy.login(usuarioTeste.email, usuarioTeste.password).then(() => {
       cy.api({
         method: 'GET',
         url: '/auth/me',
@@ -34,7 +38,7 @@ describe('Suíte de testes da camada de autenticação', () => {
       }).then((resposta) => {
         expect(resposta.status).to.eq(200);
         expect(resposta.body).to.have.property('userId');
-        expect(resposta.body).to.have.property('email', config.automacao.email);
+        expect(resposta.body).to.have.property('email', usuarioTeste.email);
       });
     });
   });
