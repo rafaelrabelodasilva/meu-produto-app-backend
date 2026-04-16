@@ -1,6 +1,6 @@
 const { faker } = require('@faker-js/faker');
 
-// Comandos de Criação para Atomização
+// Comandos de Criação para Automação
 Cypress.Commands.add('criarUsuario', (overrides = {}) => {
   const user = {
     firstName: faker.person.firstName(),
@@ -60,13 +60,25 @@ Cypress.Commands.add('criarProduto', (overrides = {}) => {
   });
 });
 
-// Comandos de Autenticação e Setup Centralizados
+Cypress.Commands.add('deletarUsuario', (userId) => {
+  if (!userId) return;
+  return cy.api({
+    method: 'DELETE',
+    url: `/users/${userId}`,
+    headers: {
+      'Authorization': `Bearer ${Cypress.env('authToken')}`
+    },
+    failOnStatusCode: false // Evita falhas se o usuário já foi removido pelo teste
+  });
+});
+
+// Comandos de Autenticação e Configuração
 Cypress.Commands.add('login', (email, password) => {
-  // Se não passar email/senha, busca do config.json
+  // Se não informar email/senha, utiliza os dados do config.json
   if (!email || !password) {
     return cy.fixture('config').then((config) => {
       const creds = config.automacao;
-      return executeLogin(email || creds.email, password || creds.password);
+      return executeLogin(creds.email, creds.password);
     });
   }
   return executeLogin(email, password);
@@ -83,23 +95,6 @@ function executeLogin(email, password) {
     expect(response.body).to.have.property('access_token');
     const token = response.body.access_token;
     Cypress.env('authToken', token);
-    cy.log(`Logado como ${email}`);
+    cy.log(`Autenticado com sucesso como: ${email}`);
   });
 }
-
-Cypress.Commands.add('garantirUsuarioAutomacao', () => {
-  cy.fixture('config').then((config) => {
-    const { email } = config.automacao;
-    const passwordHash = '$2b$10$zIdo2gVCM.SYZNxLimu0oOifRL67uuVmmBKcukno.X4W/mVYRNURi'; 
-    
-    const sql = `
-      INSERT INTO "users" ("id", "email", "password", "first_name", "last_name", "created_at", "updated_at")
-      VALUES ('${crypto.randomUUID()}', '${email}', '${passwordHash}', 'Sistema', 'Automacao', NOW(), NOW())
-      ON CONFLICT ("email") DO NOTHING;
-    `;
-
-    return cy.task('queryDb', sql).then(() => {
-      cy.log(`Usuário de automação (${email}) garantido via SQL.`);
-    });
-  });
-});

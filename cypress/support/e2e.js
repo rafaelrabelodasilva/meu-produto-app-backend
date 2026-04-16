@@ -1,24 +1,39 @@
-// ***********************************************************
-// This example support/e2e.js is processed and
-// loaded automatically before your test files.
-//
-// This is a great place to put global configuration and
-// behavior that modifies Cypress.
-//
-// You can change the location of this file or turn off
-// automatically serving support files with the
-// 'supportFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/configuration
-// ***********************************************************
-
-// Import commands.js using CommonJS syntax:
 require('./commands');
 require('cypress-plugin-api');
 require('cypress-mochawesome-reporter/register');
 
-before(() => {
-  // Garante o estado inicial do banco antes de qualquer teste
-  cy.garantirUsuarioAutomacao();
+// Antes de cada Spec, garantimos que o usuário de automação padrão exista no banco
+// Isso evita erros 401 se o spec anterior limpou o banco via TRUNCATE
+beforeEach(() => {
+  cy.fixture('config').then((config) => {
+    const creds = config.automacao;
+    cy.api({
+      method: 'POST',
+      url: '/users',
+      body: {
+        firstName: "Sistema",
+        lastName: "Automacao",
+        email: creds.email,
+        password: creds.password
+      },
+      failOnStatusCode: false // Ignora o erro 409 se o usuário já existir
+    });
+  });
+});
+
+// Limpeza TOTAL do banco ao FINAL de cada arquivo de teste (spec)
+// O TRUNCATE reseta as tabelas e os contadores de ID de forma atômica
+after(() => {
+  const sql = `
+    DO $$ 
+    BEGIN 
+      EXECUTE 'TRUNCATE TABLE "users", "products", "categories", "ProductImage" RESTART IDENTITY CASCADE';
+    EXCEPTION WHEN OTHERS THEN
+      EXECUTE 'TRUNCATE TABLE "users", "Product", "Category", "ProductImage" RESTART IDENTITY CASCADE';
+    END $$;
+  `;
+
+  cy.task('queryDb', sql).then(() => {
+    cy.log('O Banco de dados local foi limpo e resetado com sucesso.');
+  });
 });
