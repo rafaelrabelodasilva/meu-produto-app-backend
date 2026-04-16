@@ -33,7 +33,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Instalar Dependências e Preparar Banco
@@ -42,11 +42,9 @@ jobs:
         run: |
           npm install
           npx prisma generate
-          echo "--- Verificando status das migrações Prisma ---"
-          npx prisma migrate status
-          echo "--- Aplicando migrações Prisma ---"
-          npx prisma migrate deploy
-          echo "--- Migrações Prisma aplicadas ---"
+          echo "--- Sincronizando banco com Prisma DB Push ---"
+          npx prisma db push --skip-generate
+          echo "--- Banco preparado ---"
 
       - name: Subir API em Background
         env:
