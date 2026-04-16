@@ -43,7 +43,7 @@ jobs:
           npm install
           npx prisma generate
           echo "--- Sincronizando banco com Prisma DB Push ---"
-          npx prisma db push --skip-generate
+          npx prisma db push
           echo "--- Banco preparado ---"
 
       - name: Subir API em Background
