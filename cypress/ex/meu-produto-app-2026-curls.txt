@@ -1,0 +1,158 @@
+# Collection: meu-produto-app-2026
+# Source: [meu-produto-app-2026](collection/24641452-77776807-997e-47a7-9047-d2c10c854858)
+
+USERS
+
+curl --location 'http://localhost:3000/users' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/users/04476cbb-828a-4d6d-8fdd-a54d3dfee6e' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/users' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "firstName": "Rafael",
+  "lastName": "Rabelo",
+  "email": "rafael@email.com",
+  "password": "Teste@1234"
+}'
+
+curl --location --request PATCH 'http://localhost:3000/users/8c8a8f50-a980-437b-8788-cd41eaee67b0' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "firstName": "Roberto",
+  "lastName": "Rabelo",
+  "email": "rafaelrabelo@email.com",
+  "password": "Teste@1234"
+}'
+
+curl --location --request DELETE 'http://localhost:3000/users/40a1a94b-7bef-45e7-9081-a0ef3af30137' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+AUTH
+
+curl --location 'http://localhost:3000/auth/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "email": "rafael@email.com",
+  "password": "Teste@1234"
+}'
+
+curl --location 'http://localhost:3000/auth/me' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/auth/logout' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+PRODUCTS
+
+curl --location 'http://localhost:3000/products' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "Ipad",
+  "brand": "Apple",
+  "model": "PRO M4",
+  "size": "11",
+  "purchaseDate": "2025-03-10",
+  "price": 6500.99,
+  "notes": "Comprei na Shopee"
+}'
+
+curl --location 'http://localhost:3000/products' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/products/{{product_id}}' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location --request PATCH 'http://localhost:3000/products/774c4e3b-97a8-4304-a4d5-c3c656eb623c' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "Iphone",
+  "brand": "Apple",
+  "model": "13 PRO MAX",
+  "size": "Max",
+  "purchaseDate": "2020-03-10",
+  "price": 6500.99,
+  "notes": "Daqui a pouco dá defeito"
+}'
+
+curl --location --request DELETE 'http://localhost:3000/products/{{product_id}}' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/products/{{product_id}}/images' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--form 'files=@"/C:/Users/rafae/Downloads/arquitetura-kubernetes.png"' \
+--form 'files=@"/C:/Users/rafae/Downloads/1288642.jpg"'
+
+curl --location --request PATCH 'http://localhost:3000/products/{{product_id}}/images/e4b821df-a0c8-4f28-be60-25d425cf05a0' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--form 'file=@"/C:/Users/rafae/Downloads/Gemini_Generated_Image_wdguqqwdguqqwdgu.png"'
+
+curl --location --request DELETE 'http://localhost:3000/products/{{product_id}}/images/e4b821df-a0c8-4f28-be60-25d425cf05a' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/products?page=1&limit=2' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/products?search=macb' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/products?sortBy=price&order=desc' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location 'http://localhost:3000/products?brand=samsung&limit=5&page=1' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+CATEGORIES
+
+curl --location 'http://localhost:3000/categories' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location --request PATCH 'http://localhost:3000/categories/ceedc303-40d5-4c7c-b78a-405cafee9c16' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "Patrimônio"
+}'
+
+curl --location --request DELETE 'http://localhost:3000/categories/8c558ed7-d351-4111-9c0d-36f488003e5c' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}'
+
+curl --location --request PATCH 'http://localhost:3000/products/1ca40d7c-6eac-4762-8365-c4b0e84f02c5' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "categoryId": "e1b57aa7-ca57-4048-88cc-8a25ffea40a3"
+}'
+
+curl --location --request PATCH 'http://localhost:3000/products/d0088f74-fb3a-4ff4-a66d-2a9bb3d52039' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "categoryId": null
+}'
+
+curl --location 'http://localhost:3000/products' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "Teste",
+  "brand": "Redragon",
+  "model": "PRO",
+  "size": "Standard",
+  "purchaseDate": "2025-10-15",
+  "price": 500.99,
+  "notes": "Comprei na magazine luiza",
+  "categoryId": "e1b57aa7-ca57-4048-88cc-8a25ffea40a3"
+}'
+
+curl --location 'http://localhost:3000/categories' \
+--header 'Authorization: Bearer {{access_token_MP_2026}}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "PC"
+}'

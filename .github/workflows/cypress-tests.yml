@@ -1,4 +1,4 @@
-name: Robot Framework API Tests
+name: Cypress API Tests
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  api-tests:
+  cypress-tests:
     runs-on: ubuntu-latest
 
     services:
@@ -19,7 +19,7 @@ jobs:
           POSTGRES_PASSWORD: 1234
           POSTGRES_DB: meu_produto_app
         ports:
-          - 5432:5432 # Alterado para a porta padrão para simplificar a conexão
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -33,42 +33,37 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
       - name: Instalar Dependências e Preparar Banco
-        env:
-          # DATABASE_URL corrigida para porta 5432 e usuário postgres
-          DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
         run: |
           npm install
           npx prisma generate
-          npx prisma migrate deploy
-
-      - name: Instalar Robot Framework
-        run: |
-          pip install robotframework robotframework-requests
+          echo "--- Sincronizando banco com Prisma DB Push ---"
+          npx prisma db push
+          echo "--- Banco preparado ---"
+        env:
+          DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
+          JWT_SECRET: "secret_padrao_ci"
 
       - name: Subir API em Background
         env:
           DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
-          JWT_SECRET: "sua_secret_de_teste"
+          JWT_SECRET: "secret_padrao_ci"
         run: |
           npm run start &
-          # Aguarda a raiz da API responder. Se /users retornar 404 ou 401 inicialmente, o wait-on falha.
           npx wait-on http://localhost:3000/ --timeout 90000 
 
-      - name: Rodar Testes do Robot
-        run: npm run test:api
+      - name: Rodar Testes do Cypress
+        env:
+          DATABASE_URL: "postgresql://postgres:1234@localhost:5432/meu_produto_app?schema=public"
+          JWT_SECRET: "secret_padrao_ci"
+        run: npm run cypress:run
 
-      - name: Upload de Relatórios (Artifacts)
+      - name: Upload de Relatórios (Cypress)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: robot-framework-results
-          path: tests/logs/
+          name: cypress-test-reports
+          path: cypress/reports/html/
