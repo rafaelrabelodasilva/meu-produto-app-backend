@@ -100,4 +100,58 @@ export class AuthService {
       message: 'Logout realizado com sucesso',
     };
   }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('E-mail não encontrado');
+    }
+
+    // Gerar código de 6 dígitos
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetCode: code,
+        resetCodeExpires: expires,
+      },
+    });
+
+    console.log(`[RECOVERY] Código para ${email}: ${code}`);
+    return { message: 'Código de recuperação enviado para o e-mail' };
+  }
+
+  async resetPassword(body: any) {
+    const { email, code, newPassword } = body;
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user || user.resetCode !== code) {
+      throw new UnauthorizedException('Código inválido ou e-mail incorreto');
+    }
+
+    if (user.resetCodeExpires && user.resetCodeExpires < new Date()) {
+      throw new UnauthorizedException('Código expirado');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetCode: null,
+        resetCodeExpires: null,
+      },
+    });
+
+    return { message: 'Senha atualizada com sucesso' };
+  }
 }

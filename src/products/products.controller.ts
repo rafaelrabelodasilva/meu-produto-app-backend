@@ -84,7 +84,7 @@ export class ProductsController {
   }
 
   @Post(':id/images')
-  @ApiOperation({ summary: 'Fazer upload de múltiplas imagens para um produto' })
+  @ApiOperation({ summary: 'Adicionar imagens ao produto' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -94,6 +94,7 @@ export class ProductsController {
           type: 'array',
           items: { type: 'string', format: 'binary' },
         },
+        type: { type: 'string', example: 'PRODUCT', description: 'Tipo da imagem: PRODUCT ou LABEL' },
       },
     },
   })
@@ -101,6 +102,7 @@ export class ProductsController {
   async uploadImages(
     @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
+    @Body('type') type: string,
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
@@ -111,7 +113,7 @@ export class ProductsController {
     )
     files: Express.Multer.File[],
   ) {
-    const images = await this.productsService.uploadImages(id, req.user.userId, files);
+    const images = await this.productsService.uploadImages(id, req.user.userId, files, type);
     return {
       message: `${images.length} imagem(ns) enviada(s) com sucesso`,
       images,
@@ -139,6 +141,7 @@ export class ProductsController {
           type: 'string',
           format: 'binary',
         },
+        type: { type: 'string', example: 'PRODUCT' },
       },
     },
   })
@@ -147,6 +150,7 @@ export class ProductsController {
     @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Param('imageId') imageId: string,
+    @Body('type') type: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -161,6 +165,6 @@ export class ProductsController {
     if (!file) {
       throw new BadRequestException('O arquivo de imagem é obrigatório para substituição');
     }
-    return this.productsService.replaceImage(id, req.user.userId, imageId, file);
+    return this.productsService.replaceImage(id, req.user.userId, imageId, file, type);
   }
 }

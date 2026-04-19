@@ -47,4 +47,16 @@ export class AuthController {
   logout(@CurrentUser() user: AuthUser) {
     return this.authService.logout(user.userId);
   }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Solicitar recuperação de senha via e-mail' })
+  forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Redefinir senha usando o código recebido' })
+  resetPassword(@Body() body: any) {
+    return this.authService.resetPassword(body);
+  }
 }

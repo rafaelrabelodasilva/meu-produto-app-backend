@@ -14,6 +14,8 @@ model User {
   password  String
 
   refreshToken String? @map("refresh_token")
+  resetCode    String? @map("reset_code")
+  resetCodeExpires DateTime? @map("reset_code_expires")
 
   products   Product[]
   categories Category[]
@@ -64,6 +66,7 @@ model Category {
 model ProductImage {
   id        String   @id @default(uuid())
   url       String
+  type      String   @default("PRODUCT") // PRODUCT ou LABEL
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 

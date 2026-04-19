@@ -150,7 +150,7 @@ export class ProductsService {
     return deleted;
   }
 
-  async uploadImages(productId: string, userId: string, files: Express.Multer.File[]) {
+  async uploadImages(productId: string, userId: string, files: Express.Multer.File[], type: string = 'PRODUCT') {
     const product = await this.prisma.product.findFirst({
       where: { id: productId, userId },
     });
@@ -164,6 +164,7 @@ export class ProductsService {
       return this.prisma.productImage.create({
         data: {
           url,
+          type,
           productId,
         },
       });
@@ -197,7 +198,7 @@ export class ProductsService {
     };
   }
 
-  async replaceImage(productId: string, userId: string, imageId: string, file: Express.Multer.File) {
+  async replaceImage(productId: string, userId: string, imageId: string, file: Express.Multer.File, type?: string) {
     const image = await this.prisma.productImage.findFirst({
       where: {
         id: imageId,
@@ -215,7 +216,10 @@ export class ProductsService {
 
     const updated = await this.prisma.productImage.update({
       where: { id: imageId },
-      data: { url: newUrl },
+      data: { 
+        url: newUrl,
+        ...(type && { type }),
+      },
     });
 
     await this.storageService.deleteFile(oldUrl);
