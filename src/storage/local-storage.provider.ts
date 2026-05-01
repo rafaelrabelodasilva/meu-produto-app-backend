@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { StorageProvider } from './storage.provider';
+import * as Multer from 'multer';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
