@@ -8,17 +8,21 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Habilita CORS para permitir conexões do App Mobile
-  app.enableCORS();
+  app.enableCors();
 
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    forbidNonWhitelisted: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Meu Produto API')
-    .setDescription('Documentação do backend para gestão de usuários e produtos')
+    .setDescription(
+      'Documentação do backend para gestão de usuários e produtos',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();
