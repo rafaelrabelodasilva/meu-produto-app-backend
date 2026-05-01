@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -20,7 +24,9 @@ export class CategoriesService {
     });
 
     if (existing) {
-      throw new ConflictException('Já existe uma categoria com este nome (mesmo que com letras maiúsculas/minúsculas diferentes).');
+      throw new ConflictException(
+        'Já existe uma categoria com este nome (mesmo que com letras maiúsculas/minúsculas diferentes).',
+      );
     }
 
     return await this.prisma.category.create({
@@ -50,7 +56,11 @@ export class CategoriesService {
     return category;
   }
 
-  async update(id: string, userId: string, updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    id: string,
+    userId: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ) {
     await this.findOne(id, userId);
 
     if (updateCategoryDto.name) {
@@ -84,7 +94,9 @@ export class CategoriesService {
     });
 
     if (productsCount > 0) {
-      throw new ConflictException('Não é possível excluir uma categoria que possui produtos vinculados.');
+      throw new ConflictException(
+        'Não é possível excluir uma categoria que possui produtos vinculados.',
+      );
     }
 
     return this.prisma.category.delete({

@@ -55,7 +55,10 @@ export class LocalStorageProvider extends StorageProvider {
       // Se o arquivo não existir, ignoramos silenciosamente
       // Caso contrário, logamos o erro (ex: erro de permissão)
       if (error.code !== 'ENOENT') {
-        console.error(`Erro ao deletar arquivo ou pasta em ${absolutePath}:`, error);
+        console.error(
+          `Erro ao deletar arquivo ou pasta em ${absolutePath}:`,
+          error,
+        );
       }
     }
   }

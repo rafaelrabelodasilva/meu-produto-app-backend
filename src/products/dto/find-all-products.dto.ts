@@ -8,7 +8,10 @@ export enum OrderBy {
 }
 
 export class FindAllProductsDto {
-  @ApiPropertyOptional({ description: 'Termo de busca (nome, marca ou modelo)', example: 'iPhone' })
+  @ApiPropertyOptional({
+    description: 'Termo de busca (nome, marca ou modelo)',
+    example: 'iPhone',
+  })
   @IsOptional()
   @IsString()
   search?: string;
@@ -18,7 +21,10 @@ export class FindAllProductsDto {
   @IsString()
   brand?: string;
 
-  @ApiPropertyOptional({ description: 'Filtrar por ID da categoria', example: 'uuid-da-categoria' })
+  @ApiPropertyOptional({
+    description: 'Filtrar por ID da categoria',
+    example: 'uuid-da-categoria',
+  })
   @IsOptional()
   @IsString()
   categoryId?: string;
@@ -30,7 +36,11 @@ export class FindAllProductsDto {
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ description: 'Itens por página', default: 10, maximum: 100 })
+  @ApiPropertyOptional({
+    description: 'Itens por página',
+    default: 10,
+    maximum: 100,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -38,12 +48,19 @@ export class FindAllProductsDto {
   @Max(100)
   limit?: number = 10;
 
-  @ApiPropertyOptional({ description: 'Campo para ordenação', default: 'createdAt' })
+  @ApiPropertyOptional({
+    description: 'Campo para ordenação',
+    default: 'createdAt',
+  })
   @IsOptional()
   @IsString()
   sortBy?: string = 'createdAt';
 
-  @ApiPropertyOptional({ enum: OrderBy, description: 'Direção da ordenação', default: OrderBy.DESC })
+  @ApiPropertyOptional({
+    enum: OrderBy,
+    description: 'Direção da ordenação',
+    default: OrderBy.DESC,
+  })
   @IsOptional()
   @IsEnum(OrderBy)
   order?: OrderBy = OrderBy.DESC;

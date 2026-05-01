@@ -25,7 +25,14 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 
 export interface AuthenticatedRequest extends Request {
   user: {
@@ -94,7 +101,11 @@ export class ProductsController {
           type: 'array',
           items: { type: 'string', format: 'binary' },
         },
-        type: { type: 'string', example: 'PRODUCT', description: 'Tipo da imagem: PRODUCT ou LABEL' },
+        type: {
+          type: 'string',
+          example: 'PRODUCT',
+          description: 'Tipo da imagem: PRODUCT ou LABEL',
+        },
       },
     },
   })
@@ -113,7 +124,12 @@ export class ProductsController {
     )
     files: Express.Multer.File[],
   ) {
-    const images = await this.productsService.uploadImages(id, req.user.userId, files, type);
+    const images = await this.productsService.uploadImages(
+      id,
+      req.user.userId,
+      files,
+      type,
+    );
     return {
       message: `${images.length} imagem(ns) enviada(s) com sucesso`,
       images,
@@ -163,8 +179,16 @@ export class ProductsController {
     file: Express.Multer.File,
   ) {
     if (!file) {
-      throw new BadRequestException('O arquivo de imagem é obrigatório para substituição');
+      throw new BadRequestException(
+        'O arquivo de imagem é obrigatório para substituição',
+      );
     }
-    return this.productsService.replaceImage(id, req.user.userId, imageId, file, type);
+    return this.productsService.replaceImage(
+      id,
+      req.user.userId,
+      imageId,
+      file,
+      type,
+    );
   }
 }

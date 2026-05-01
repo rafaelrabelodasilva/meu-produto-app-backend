@@ -5,7 +5,10 @@ import { StorageProvider } from './storage.provider';
 export class StorageService {
   constructor(private readonly storageProvider: StorageProvider) {}
 
-  async uploadFile(file: Express.Multer.File, folder: string = ''): Promise<string> {
+  async uploadFile(
+    file: Express.Multer.File,
+    folder: string = '',
+  ): Promise<string> {
     return this.storageProvider.save(file, folder);
   }
 

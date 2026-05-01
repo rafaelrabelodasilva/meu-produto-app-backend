@@ -1,9 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Request } from 'express';
 
 interface AuthenticatedRequest extends Request {
@@ -23,7 +38,10 @@ export class CategoriesController {
   @Post()
   @ApiOperation({ summary: 'Criar uma nova categoria' })
   @ApiResponse({ status: 201, description: 'Categoria criada com sucesso.' })
-  create(@Req() req: AuthenticatedRequest, @Body() createCategoryDto: CreateCategoryDto) {
+  create(
+    @Req() req: AuthenticatedRequest,
+    @Body() createCategoryDto: CreateCategoryDto,
+  ) {
     return this.categoriesService.create(req.user.userId, createCategoryDto);
   }
 
@@ -46,7 +64,11 @@ export class CategoriesController {
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoriesService.update(id, req.user.userId, updateCategoryDto);
+    return this.categoriesService.update(
+      id,
+      req.user.userId,
+      updateCategoryDto,
+    );
   }
 
   @Delete(':id')

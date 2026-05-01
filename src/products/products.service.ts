@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -150,7 +154,12 @@ export class ProductsService {
     return deleted;
   }
 
-  async uploadImages(productId: string, userId: string, files: Express.Multer.File[], type: string = 'PRODUCT') {
+  async uploadImages(
+    productId: string,
+    userId: string,
+    files: Express.Multer.File[],
+    type: string = 'PRODUCT',
+  ) {
     const product = await this.prisma.product.findFirst({
       where: { id: productId, userId },
     });
@@ -160,7 +169,10 @@ export class ProductsService {
     }
 
     const uploadPromises = files.map(async (file) => {
-      const url = await this.storageService.uploadFile(file, `products/${productId}`);
+      const url = await this.storageService.uploadFile(
+        file,
+        `products/${productId}`,
+      );
       return this.prisma.productImage.create({
         data: {
           url,
@@ -183,7 +195,9 @@ export class ProductsService {
     });
 
     if (!image) {
-      throw new NotFoundException(`Imagem com ID ${imageId} não encontrada para este produto`);
+      throw new NotFoundException(
+        `Imagem com ID ${imageId} não encontrada para este produto`,
+      );
     }
 
     await this.prisma.productImage.delete({
@@ -198,7 +212,13 @@ export class ProductsService {
     };
   }
 
-  async replaceImage(productId: string, userId: string, imageId: string, file: Express.Multer.File, type?: string) {
+  async replaceImage(
+    productId: string,
+    userId: string,
+    imageId: string,
+    file: Express.Multer.File,
+    type?: string,
+  ) {
     const image = await this.prisma.productImage.findFirst({
       where: {
         id: imageId,
@@ -208,15 +228,20 @@ export class ProductsService {
     });
 
     if (!image) {
-      throw new NotFoundException(`Imagem com ID ${imageId} não encontrada para este produto`);
+      throw new NotFoundException(
+        `Imagem com ID ${imageId} não encontrada para este produto`,
+      );
     }
 
     const oldUrl = image.url;
-    const newUrl = await this.storageService.uploadFile(file, `products/${productId}`);
+    const newUrl = await this.storageService.uploadFile(
+      file,
+      `products/${productId}`,
+    );
 
     const updated = await this.prisma.productImage.update({
       where: { id: imageId },
-      data: { 
+      data: {
         url: newUrl,
         ...(type && { type }),
       },

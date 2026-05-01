@@ -11,36 +11,48 @@ export class CreateProductDto {
   @IsString()
   brand?: string;
 
-  @ApiPropertyOptional({ description: 'Modelo do produto', example: '128GB Titanium' })
+  @ApiPropertyOptional({
+    description: 'Modelo do produto',
+    example: '128GB Titanium',
+  })
   @IsOptional()
   @IsString()
   model?: string;
 
-  @ApiPropertyOptional({ description: 'Tamanho ou dimensões', example: '6.1 polegadas' })
+  @ApiPropertyOptional({
+    description: 'Tamanho ou dimensões',
+    example: '6.1 polegadas',
+  })
   @IsOptional()
   @IsString()
   size?: string;
 
-  @ApiPropertyOptional({ description: 'Data da compra', example: '2024-01-15T00:00:00Z' })
+  @ApiPropertyOptional({
+    description: 'Data da compra',
+    example: '2024-01-15T00:00:00Z',
+  })
   @IsOptional()
   @IsDateString()
   purchaseDate?: string;
 
-  @ApiPropertyOptional({ description: 'Preço pago', example: 7500.00 })
+  @ApiPropertyOptional({ description: 'Preço pago', example: 7500.0 })
   @IsOptional()
   @IsNumber()
   price?: number;
 
-  @ApiPropertyOptional({ description: 'Observações adicionais', example: 'Comprado na iPlace' })
+  @ApiPropertyOptional({
+    description: 'Observações adicionais',
+    example: 'Comprado na iPlace',
+  })
   @IsOptional()
   @IsString()
   notes?: string;
 
-  @ApiPropertyOptional({ description: 'ID da categoria do produto', example: 'uuid-da-categoria' })
+  @ApiPropertyOptional({
+    description: 'ID da categoria do produto',
+    example: 'uuid-da-categoria',
+  })
   @IsOptional()
   @IsString()
   categoryId?: string | null;
-  }
-
-
-
+}
