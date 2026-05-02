@@ -180,14 +180,29 @@ export class FamiliesService {
       throw new BadRequestException('Remova todos os membros antes de excluir a família');
     }
 
-    // Desvincular produtos da família antes de excluir
-    await this.prisma.product.updateMany({
-      where: { familyId },
-      data: { familyId: null },
-    });
+    // Usar transação para garantir que tudo ocorra ou nada ocorra
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Desvincular produtos da família
+      await tx.product.updateMany({
+        where: { familyId },
+        data: { familyId: null },
+      });
 
-    return this.prisma.family.delete({
-      where: { id: familyId },
+      // 2. Desvincular categorias da família
+      await tx.category.updateMany({
+        where: { familyId },
+        data: { familyId: null },
+      });
+
+      // 3. Remover o único membro (o dono)
+      await tx.familyMember.delete({
+        where: { userId_familyId: { userId, familyId } },
+      });
+
+      // 4. Excluir a família
+      return tx.family.delete({
+        where: { id: familyId },
+      });
     });
   }
 }
