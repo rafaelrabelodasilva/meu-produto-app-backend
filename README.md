@@ -4,13 +4,14 @@ O cérebro por trás do **Meu Produto**, um ecossistema inteligente e lúdico pa
 
 ## 🚀 Sobre o Projeto
 
-O **Meu Produto** nasceu da necessidade de organizar o caos doméstico. Quantas vezes você já comprou algo que já tinha ou não encontrou a medida de um móvel quando estava na loja? Este backend provê uma API robusta e segura para catalogar itens, gerenciar medidas e compartilhar o inventário com toda a família.
+O **Meu Produto** nasceu para que você nunca mais esqueça o tamanho das suas coisas. Quantas vezes você já esteve em uma loja e não soube o tamanho exato da sua mesa para comprar uma toalha, ou o modelo da lâmpada do quarto para comprar uma reserva? Este backend provê uma API robusta e segura para catalogar itens, gerenciar medidas e compartilhar essas informações essenciais com toda a família.
 
 ### 🧠 O que ele resolve?
 
-- **Fragmentação de Informação:** Centraliza fotos, manuais, etiquetas e medidas em um só lugar.
-- **Dificuldade de Compartilhamento:** Permite que famílias criem "casas virtuais" para que todos saibam o que existe no inventário comum.
-- **Gestão de Espaço:** Armazena dimensões precisas para consulta rápida durante compras ou reformas.
+- **Dúvidas de Compra:** "Qual o tamanho da minha cama para o lençol?", "Qual o tamanho da máquina para a capa?".
+- **Manutenção Facilitada:** "Qual o modelo exato dessa lâmpada ou filtro?" (acesso rápido a fotos de etiquetas).
+- **Gestão Familiar:** Centraliza as medidas do lar para que qualquer membro da família possa consultar antes de uma compra.
+- **Fim da Adivinhação:** Substitui o "acho que é esse tamanho" por dados técnicos reais.
 
 ## 🛠️ Tecnologias Utilizadas
 
