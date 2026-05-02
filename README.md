@@ -85,4 +85,4 @@ Acesse a documentação Swagger em `http://localhost:3000/api/docs`.
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rafaelrabelodasilva/)
 
 ---
-*Desenvolvido com carinho pelo Gatinho Organizador 🐱*
+*Gerencie seu lar com o Gatinho Organizador 🐾 🐱*
