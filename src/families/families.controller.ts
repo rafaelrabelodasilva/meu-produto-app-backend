@@ -17,7 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthenticatedRequest } from '../products/products.controller';
+import type { AuthenticatedRequest } from '../products/products.controller';
 
 @ApiTags('families')
 @ApiBearerAuth()
