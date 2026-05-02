@@ -23,6 +23,7 @@ import * as Multer from 'multer';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { UploadImageDto } from './dto/upload-image.dto';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
@@ -104,6 +105,7 @@ export class ProductsController {
         },
         type: {
           type: 'string',
+          enum: ['PRODUCT', 'LABEL'],
           example: 'PRODUCT',
           description: 'Tipo da imagem: PRODUCT ou LABEL',
         },
@@ -114,12 +116,12 @@ export class ProductsController {
   async uploadImages(
     @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
-    @Body('type') type: string,
+    @Body() uploadImageDto: UploadImageDto,
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // 10MB
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp|image\/.*)/ }),
         ],
       }),
     )
@@ -129,7 +131,7 @@ export class ProductsController {
       id,
       req.user.userId,
       files,
-      type,
+      uploadImageDto.type,
     );
     return {
       message: `${images.length} imagem(ns) enviada(s) com sucesso`,
@@ -158,7 +160,11 @@ export class ProductsController {
           type: 'string',
           format: 'binary',
         },
-        type: { type: 'string', example: 'PRODUCT' },
+        type: {
+          type: 'string',
+          enum: ['PRODUCT', 'LABEL'],
+          example: 'PRODUCT',
+        },
       },
     },
   })
@@ -167,12 +173,12 @@ export class ProductsController {
     @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Param('imageId') imageId: string,
-    @Body('type') type: string,
+    @Body() uploadImageDto: UploadImageDto,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // 10MB
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp|image\/.*)/ }),
         ],
         fileIsRequired: false,
       }),
@@ -189,7 +195,7 @@ export class ProductsController {
       req.user.userId,
       imageId,
       file,
-      type,
+      uploadImageDto.type,
     );
   }
 }
