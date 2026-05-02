@@ -19,9 +19,20 @@ export class ProductsService {
   ) {}
 
   async create(userId: string, data: CreateProductDto) {
+    // Buscar se o usuário pertence a alguma família para associar o produto à família principal
+    const familyMember = await this.prisma.familyMember.findFirst({
+      where: { userId },
+    });
+
     if (data.categoryId) {
       const category = await this.prisma.category.findFirst({
-        where: { id: data.categoryId, userId },
+        where: { 
+          id: data.categoryId, 
+          OR: [
+            { userId },
+            { familyId: familyMember?.familyId }
+          ]
+        },
       });
       if (!category) {
         throw new NotFoundException('Categoria não encontrada.');
@@ -35,6 +46,7 @@ export class ProductsService {
           ? new Date(data.purchaseDate)
           : undefined,
         userId,
+        familyId: familyMember?.familyId, // Associa à família se existir
       },
       include: { category: true },
     });
@@ -51,8 +63,18 @@ export class ProductsService {
 
     const skip = (page - 1) * limit;
 
+    // Buscar IDs das famílias das quais o usuário faz parte
+    const userFamilies = await this.prisma.familyMember.findMany({
+      where: { userId },
+      select: { familyId: true },
+    });
+    const familyIds = userFamilies.map(f => f.familyId);
+
     const where: Prisma.ProductWhereInput = {
-      userId,
+      OR: [
+        { userId }, // Produtos do próprio usuário
+        { familyId: { in: familyIds } }, // Produtos das famílias do usuário
+      ],
       ...(categoryId && { categoryId }),
       ...(brand && { brand: { contains: brand, mode: 'insensitive' } }),
       ...(search && {
@@ -68,7 +90,13 @@ export class ProductsService {
       this.prisma.product.count({ where }),
       this.prisma.product.findMany({
         where,
-        include: { images: true, category: true },
+        include: { 
+          images: true, 
+          category: true,
+          user: { // Incluir dados do criador
+            select: { firstName: true, lastName: true }
+          }
+        },
         skip,
         take: limit,
         orderBy: { [sortBy]: order } as Prisma.ProductOrderByWithRelationInput,
@@ -86,9 +114,26 @@ export class ProductsService {
   }
 
   async findOne(id: string, userId: string) {
+    // Buscar famílias do usuário
+    const userFamilies = await this.prisma.familyMember.findMany({
+      where: { userId },
+      select: { familyId: true },
+    });
+    const familyIds = userFamilies.map(f => f.familyId);
+
     const product = await this.prisma.product.findFirst({
-      where: { id, userId },
-      include: { images: true, category: true },
+      where: { 
+        id,
+        OR: [
+          { userId },
+          { familyId: { in: familyIds } }
+        ]
+      },
+      include: { 
+        images: true, 
+        category: true,
+        user: { select: { firstName: true, lastName: true } }
+      },
     });
 
     if (!product) {
@@ -99,8 +144,21 @@ export class ProductsService {
   }
 
   async update(id: string, userId: string, data: UpdateProductDto) {
+    // Verificar permissão (pertence ao usuário ou à família do usuário)
+    const userFamilies = await this.prisma.familyMember.findMany({
+      where: { userId },
+      select: { familyId: true },
+    });
+    const familyIds = userFamilies.map(f => f.familyId);
+
     const product = await this.prisma.product.findFirst({
-      where: { id, userId },
+      where: { 
+        id,
+        OR: [
+          { userId },
+          { familyId: { in: familyIds } }
+        ]
+      },
     });
 
     if (!product) {
@@ -109,7 +167,13 @@ export class ProductsService {
 
     if (data.categoryId) {
       const category = await this.prisma.category.findFirst({
-        where: { id: data.categoryId, userId },
+        where: { 
+          id: data.categoryId,
+          OR: [
+            { userId },
+            { familyId: { in: familyIds } }
+          ]
+        },
       });
       if (!category) {
         throw new NotFoundException('Categoria não encontrada.');
@@ -129,8 +193,20 @@ export class ProductsService {
   }
 
   async remove(id: string, userId: string) {
+    const userFamilies = await this.prisma.familyMember.findMany({
+      where: { userId },
+      select: { familyId: true },
+    });
+    const familyIds = userFamilies.map(f => f.familyId);
+
     const product = await this.prisma.product.findFirst({
-      where: { id, userId },
+      where: { 
+        id,
+        OR: [
+          { userId },
+          { familyId: { in: familyIds } }
+        ]
+      },
       include: { images: true },
     });
 
@@ -161,8 +237,20 @@ export class ProductsService {
     files: Express.Multer.File[],
     type: string = 'PRODUCT',
   ) {
+    const userFamilies = await this.prisma.familyMember.findMany({
+      where: { userId },
+      select: { familyId: true },
+    });
+    const familyIds = userFamilies.map(f => f.familyId);
+
     const product = await this.prisma.product.findFirst({
-      where: { id: productId, userId },
+      where: { 
+        id: productId,
+        OR: [
+          { userId },
+          { familyId: { in: familyIds } }
+        ]
+      },
     });
 
     if (!product) {
@@ -187,11 +275,22 @@ export class ProductsService {
   }
 
   async deleteImage(productId: string, userId: string, imageId: string) {
+    const userFamilies = await this.prisma.familyMember.findMany({
+      where: { userId },
+      select: { familyId: true },
+    });
+    const familyIds = userFamilies.map(f => f.familyId);
+
     const image = await this.prisma.productImage.findFirst({
       where: {
         id: imageId,
         productId,
-        product: { userId },
+        product: { 
+          OR: [
+            { userId },
+            { familyId: { in: familyIds } }
+          ]
+        },
       },
     });
 
@@ -220,11 +319,22 @@ export class ProductsService {
     file: Express.Multer.File,
     type?: string,
   ) {
+    const userFamilies = await this.prisma.familyMember.findMany({
+      where: { userId },
+      select: { familyId: true },
+    });
+    const familyIds = userFamilies.map(f => f.familyId);
+
     const image = await this.prisma.productImage.findFirst({
       where: {
         id: imageId,
         productId,
-        product: { userId },
+        product: { 
+          OR: [
+            { userId },
+            { familyId: { in: familyIds } }
+          ]
+        },
       },
     });
 

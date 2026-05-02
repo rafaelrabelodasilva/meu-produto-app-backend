@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { StorageModule } from './storage/storage.module';
+import { FamiliesModule } from './families/families.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -22,6 +23,7 @@ import { join } from 'path';
     ProductsModule,
     CategoriesModule,
     StorageModule,
+    FamiliesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

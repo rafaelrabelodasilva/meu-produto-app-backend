@@ -19,6 +19,7 @@ model User {
 
   products   Product[]
   categories Category[]
+  familyMembers FamilyMember[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -26,8 +27,48 @@ model User {
   @@map("users")
 }
 
+model Family {
+  id   String @id @default(uuid())
+  name String
+
+  inviteCode        String?   @unique @map("invite_code")
+  inviteCodeExpires DateTime? @map("invite_code_expires")
+
+  members    FamilyMember[]
+  products   Product[]
+  categories Category[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("families")
+}
+
+enum FamilyRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model FamilyMember {
+  id   String     @id @default(uuid())
+  role FamilyRole @default(MEMBER)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  familyId String
+  family   Family @relation(fields: [familyId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, familyId])
+  @@map("family_members")
+}
+
 model Product {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String
   brand        String?
   model        String?
@@ -37,7 +78,10 @@ model Product {
   notes        String?
 
   userId String
-  user   User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  familyId String?
+  family   Family? @relation(fields: [familyId], references: [id])
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id])
@@ -46,6 +90,8 @@ model Product {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("products")
 }
 
 model Category {
@@ -53,7 +99,10 @@ model Category {
   name String
 
   userId String
-  user   User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  familyId String?
+  family   Family? @relation(fields: [familyId], references: [id])
 
   products Product[]
 
@@ -61,6 +110,7 @@ model Category {
   updatedAt DateTime @updatedAt
 
   @@unique([name, userId])
+  @@map("categories")
 }
 
 model ProductImage {
