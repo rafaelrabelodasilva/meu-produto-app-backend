@@ -56,4 +56,30 @@ export class FamiliesController {
   join(@Req() req: AuthenticatedRequest, @Body() joinFamilyDto: JoinFamilyDto) {
     return this.familiesService.join(req.user.userId, joinFamilyDto.inviteCode);
   }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Editar o nome da família' })
+  update(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() updateFamilyDto: CreateFamilyDto,
+  ) {
+    return this.familiesService.update(req.user.userId, id, updateFamilyDto);
+  }
+
+  @Delete(':id/members/:memberId')
+  @ApiOperation({ summary: 'Remover um membro da família' })
+  removeMember(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Param('memberId') memberId: string,
+  ) {
+    return this.familiesService.removeMember(req.user.userId, id, memberId);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Excluir uma família' })
+  deleteFamily(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    return this.familiesService.deleteFamily(req.user.userId, id);
+  }
 }

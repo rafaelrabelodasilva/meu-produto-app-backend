@@ -124,4 +124,70 @@ export class FamiliesService {
       },
     });
   }
+
+  async update(userId: string, familyId: string, data: { name: string }) {
+    const member = await this.prisma.familyMember.findUnique({
+      where: { userId_familyId: { userId, familyId } },
+    });
+
+    if (!member || member.role !== FamilyRole.OWNER) {
+      throw new ForbiddenException('Apenas o dono pode editar o nome da família');
+    }
+
+    return this.prisma.family.update({
+      where: { id: familyId },
+      data: { name: data.name },
+    });
+  }
+
+  async removeMember(adminId: string, familyId: string, memberIdToRemove: string) {
+    const admin = await this.prisma.familyMember.findUnique({
+      where: { userId_familyId: { userId: adminId, familyId } },
+    });
+
+    if (!admin || (admin.role !== FamilyRole.OWNER && admin.role !== FamilyRole.ADMIN)) {
+      throw new ForbiddenException('Sem permissão para remover membros');
+    }
+
+    // Não pode remover o dono
+    const targetMember = await this.prisma.familyMember.findFirst({
+      where: { userId: memberIdToRemove, familyId },
+    });
+
+    if (targetMember?.role === FamilyRole.OWNER) {
+      throw new BadRequestException('O dono da família não pode ser removido');
+    }
+
+    return this.prisma.familyMember.delete({
+      where: { userId_familyId: { userId: memberIdToRemove, familyId } },
+    });
+  }
+
+  async deleteFamily(userId: string, familyId: string) {
+    const member = await this.prisma.familyMember.findUnique({
+      where: { userId_familyId: { userId, familyId } },
+    });
+
+    if (!member || member.role !== FamilyRole.OWNER) {
+      throw new ForbiddenException('Apenas o dono pode excluir a família');
+    }
+
+    const memberCount = await this.prisma.familyMember.count({
+      where: { familyId },
+    });
+
+    if (memberCount > 1) {
+      throw new BadRequestException('Remova todos os membros antes de excluir a família');
+    }
+
+    // Desvincular produtos da família antes de excluir
+    await this.prisma.product.updateMany({
+      where: { familyId },
+      data: { familyId: null },
+    });
+
+    return this.prisma.family.delete({
+      where: { id: familyId },
+    });
+  }
 }
