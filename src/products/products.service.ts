@@ -70,6 +70,19 @@ export class ProductsService {
     });
     const familyIds = userFamilies.map(f => f.familyId);
 
+    // AUTO-SYNC: Se o usuário tiver EXATAMENTE uma família, vincular produtos órfãos a ela
+    if (familyIds.length === 1) {
+      await this.prisma.product.updateMany({
+        where: { userId, familyId: null },
+        data: { familyId: familyIds[0] },
+      });
+      // Sincronizar categorias também
+      await this.prisma.category.updateMany({
+        where: { userId, familyId: null },
+        data: { familyId: familyIds[0] },
+      });
+    }
+
     const where: Prisma.ProductWhereInput = {
       OR: [
         { userId }, // Produtos do próprio usuário
