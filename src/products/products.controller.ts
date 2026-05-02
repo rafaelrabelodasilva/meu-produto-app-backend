@@ -123,10 +123,14 @@ export class ProductsController {
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // 10MB
           new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp|image\/.*)/ }),
         ],
+        fileIsRequired: false,
       }),
     )
     files: Express.Multer.File[],
   ) {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('Pelo menos um arquivo de imagem ("files") deve ser enviado');
+    }
     const images = await this.productsService.uploadImages(
       id,
       req.user.userId,
@@ -159,6 +163,7 @@ export class ProductsController {
         file: {
           type: 'string',
           format: 'binary',
+          description: 'Pode ser enviado como "file" ou "files"'
         },
         type: {
           type: 'string',
@@ -168,13 +173,13 @@ export class ProductsController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files', 1)) // Usar FilesInterceptor para ser mais flexível com nomes se necessário, mas mantendo um limite
   async replaceImage(
     @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Param('imageId') imageId: string,
     @Body() uploadImageDto: UploadImageDto,
-    @UploadedFile(
+    @UploadedFiles(
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // 10MB
@@ -183,11 +188,12 @@ export class ProductsController {
         fileIsRequired: false,
       }),
     )
-    file: Express.Multer.File,
+    files: Express.Multer.File[],
   ) {
+    const file = files && files.length > 0 ? files[0] : null;
     if (!file) {
       throw new BadRequestException(
-        'O arquivo de imagem é obrigatório para substituição',
+        'O arquivo de imagem ("files") é obrigatório para substituição',
       );
     }
     return this.productsService.replaceImage(
