@@ -3,8 +3,10 @@ import { ListCategoryService } from '../../../services/user/category/ListCategor
 
 class ListCategoryController {
   async handle(req: Request, res: Response) {
+    const userId = req.user_id;
+
     const listCategoryService = new ListCategoryService();
-    const categories = await listCategoryService.execute();
+    const categories = await listCategoryService.execute(userId);
     return res.json(categories);
   }
 }

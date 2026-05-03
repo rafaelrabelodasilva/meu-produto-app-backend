@@ -20,7 +20,7 @@ export function isAuthenticated(
 
   try {
     //Validar o token
-    const { sub } = verify(token, process.env.JWT_SECRET) as Payload;
+    const { sub } = verify(token, process.env.JWT_SECRET as string) as Payload;
 
     console.log(sub);
     req.user_id = sub;

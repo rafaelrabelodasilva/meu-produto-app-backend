@@ -1,4 +1,4 @@
-import { compare } from 'bcryptjs';
+import { compare } from 'bcrypt';
 import prismaClient from '../../prisma';
 import { sign } from 'jsonwebtoken';
 
@@ -27,10 +27,10 @@ class AuthUserService {
 
     const token = sign(
       {
-        firstName: user.first_name,
-        lastName: user.last_name,
+        firstName: user.firstName,
+        lastName: user.lastName,
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET as string,
       {
         subject: user.id,
         expiresIn: '30d',
@@ -39,8 +39,8 @@ class AuthUserService {
 
     return {
       id: user.id,
-      firstName: user.first_name,
-      lastName: user.last_name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       token: token,
     };

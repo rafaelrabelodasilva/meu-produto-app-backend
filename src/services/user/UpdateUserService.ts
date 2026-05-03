@@ -1,4 +1,4 @@
-import { hash } from 'bcryptjs';
+import { hash } from 'bcrypt';
 import prismaClient from '../../prisma';
 
 interface UpdateUserRequest {
@@ -38,15 +38,15 @@ class UpdateUserService {
     const updatedUser = await prismaClient.user.update({
       where: { id: userId },
       data: {
-        first_name: firstName ?? user.first_name,
-        last_name: lastName ?? user.last_name,
+        firstName: firstName ?? user.firstName,
+        lastName: lastName ?? user.lastName,
         email: email ?? user.email,
         password: password ? await hash(password, 8) : user.password,
       },
       select: {
         id: true,
-        first_name: true,
-        last_name: true,
+        firstName: true,
+        lastName: true,
         email: true,
       },
     });
