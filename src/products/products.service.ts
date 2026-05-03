@@ -111,8 +111,16 @@ export class ProductsService {
       }),
     ]);
 
+    const formattedItems = items.map(product => ({
+      ...product,
+      images: product.images.map(img => ({
+        ...img,
+        url: `${process.env.SUPABASE_URL}/storage/v1/object/public/${process.env.SUPABASE_BUCKET || 'meu-produto-images'}/${img.url}`
+      }))
+    }));
+
     return {
-      data: items,
+      data: formattedItems,
       meta: {
         total,
         page,
@@ -145,7 +153,13 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado');
     }
 
-    return product;
+    return {
+      ...product,
+      images: product.images.map(img => ({
+        ...img,
+        url: `${process.env.SUPABASE_URL}/storage/v1/object/public/${process.env.SUPABASE_BUCKET || 'meu-produto-images'}/${img.url}`
+      }))
+    };
   }
 
   async update(id: string, userId: string, data: UpdateProductDto) {
