@@ -36,7 +36,7 @@ export class ProductsService {
       }
     }
 
-    return this.prisma.product.create({
+    const product = await this.prisma.product.create({
       data: {
         ...data,
         purchaseDate: data.purchaseDate
@@ -45,8 +45,14 @@ export class ProductsService {
         userId,
         familyId: familyMember?.familyId, // Associa à família se existir
       },
-      include: { category: true },
+      include: { 
+        category: true,
+        images: true,
+        user: { select: { firstName: true, lastName: true } }
+      },
     });
+
+    return this.formatProduct(product);
   }
 
   async findAll(userId: string, query: FindAllProductsDto) {
@@ -111,13 +117,7 @@ export class ProductsService {
       }),
     ]);
 
-    const formattedItems = items.map(product => ({
-      ...product,
-      images: product.images.map(img => ({
-        ...img,
-        url: `${process.env.SUPABASE_URL}/storage/v1/object/public/${process.env.SUPABASE_BUCKET || 'meu-produto-images'}/${img.url}`
-      }))
-    }));
+    const formattedItems = items.map(product => this.formatProduct(product));
 
     return {
       data: formattedItems,
@@ -153,12 +153,22 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado');
     }
 
+    return this.formatProduct(product);
+  }
+
+  private formatProduct(product: any) {
+    if (!product) return null;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const bucketName = process.env.SUPABASE_BUCKET || 'meu-produto-images';
+
     return {
       ...product,
-      images: product.images.map(img => ({
+      images: product.images?.map(img => ({
         ...img,
-        url: `${process.env.SUPABASE_URL}/storage/v1/object/public/${process.env.SUPABASE_BUCKET || 'meu-produto-images'}/${img.url}`
-      }))
+        url: img.url.startsWith('http') 
+          ? img.url 
+          : `${supabaseUrl}/storage/v1/object/public/${bucketName}/${img.url}`
+      })) || []
     };
   }
 
@@ -193,7 +203,7 @@ export class ProductsService {
       }
     }
 
-    return this.prisma.product.update({
+    const updated = await this.prisma.product.update({
       where: { id },
       data: {
         ...data,
@@ -201,8 +211,14 @@ export class ProductsService {
           ? new Date(data.purchaseDate)
           : undefined,
       },
-      include: { images: true, category: true },
+      include: { 
+        images: true, 
+        category: true,
+        user: { select: { firstName: true, lastName: true } }
+      },
     });
+
+    return this.formatProduct(updated);
   }
 
   async remove(id: string, userId: string) {
@@ -278,7 +294,14 @@ export class ProductsService {
       });
     });
 
-    return Promise.all(uploadPromises);
+    const images = await Promise.all(uploadPromises);
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const bucketName = process.env.SUPABASE_BUCKET || 'meu-produto-images';
+
+    return images.map(img => ({
+      ...img,
+      url: `${supabaseUrl}/storage/v1/object/public/${bucketName}/${img.url}`
+    }));
   }
 
   async deleteImage(productId: string, userId: string, imageId: string) {
