@@ -38,15 +38,15 @@ export class FindAllProductsDto {
 
   @ApiPropertyOptional({
     description: 'Itens por página',
-    default: 10,
-    maximum: 100,
+    default: 50,
+    maximum: 1000,
   })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(100)
-  limit?: number = 10;
+  @Max(1000)
+  limit?: number = 50;
 
   @ApiPropertyOptional({
     description: 'Campo para ordenação',

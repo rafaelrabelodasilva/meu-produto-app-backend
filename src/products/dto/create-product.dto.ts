@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsDateString, IsNumber, ValidateIf } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsDateString,
+  IsNumber,
+  ValidateIf,
+} from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({ description: 'Nome do produto', example: 'iPhone 15 Pro' })

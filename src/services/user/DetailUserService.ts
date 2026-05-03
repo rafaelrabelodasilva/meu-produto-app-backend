@@ -1,22 +1,21 @@
-import prismaClient from "../../prisma";
+import prismaClient from '../../prisma';
 
-class DetailUserService{
-  async execute(user_id: string){
-
+class DetailUserService {
+  async execute(user_id: string) {
     const user = await prismaClient.user.findFirst({
       where: {
-        id: user_id
+        id: user_id,
       },
-      select:{
-        id: true, 
+      select: {
+        id: true,
         first_name: true,
         last_name: true,
-        email: true
-      }
-    })
+        email: true,
+      },
+    });
 
-    return user
+    return user;
   }
 }
 
-export { DetailUserService }
+export { DetailUserService };

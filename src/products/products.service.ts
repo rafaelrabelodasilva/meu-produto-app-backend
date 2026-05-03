@@ -26,12 +26,9 @@ export class ProductsService {
 
     if (data.categoryId) {
       const category = await this.prisma.category.findFirst({
-        where: { 
-          id: data.categoryId, 
-          OR: [
-            { userId },
-            { familyId: familyMember?.familyId }
-          ]
+        where: {
+          id: data.categoryId,
+          OR: [{ userId }, { familyId: familyMember?.familyId }],
         },
       });
       if (!category) {
@@ -54,7 +51,7 @@ export class ProductsService {
 
   async findAll(userId: string, query: FindAllProductsDto) {
     const page = query.page || 1;
-    const limit = query.limit || 10;
+    const limit = query.limit || 50;
     const sortBy = query.sortBy || 'createdAt';
     const order = query.order || 'desc';
     const search = query.search;
@@ -68,7 +65,7 @@ export class ProductsService {
       where: { userId },
       select: { familyId: true },
     });
-    const familyIds = userFamilies.map(f => f.familyId);
+    const familyIds = userFamilies.map((f) => f.familyId);
 
     // AUTO-SYNC: Se o usuário tiver EXATAMENTE uma família, vincular produtos órfãos a ela
     if (familyIds.length === 1) {
@@ -110,8 +107,6 @@ export class ProductsService {
             select: { firstName: true, lastName: true }
           }
         },
-        skip,
-        take: limit,
         orderBy: { [sortBy]: order } as Prisma.ProductOrderByWithRelationInput,
       }),
     ]);
@@ -132,20 +127,17 @@ export class ProductsService {
       where: { userId },
       select: { familyId: true },
     });
-    const familyIds = userFamilies.map(f => f.familyId);
+    const familyIds = userFamilies.map((f) => f.familyId);
 
     const product = await this.prisma.product.findFirst({
-      where: { 
+      where: {
         id,
-        OR: [
-          { userId },
-          { familyId: { in: familyIds } }
-        ]
+        OR: [{ userId }, { familyId: { in: familyIds } }],
       },
-      include: { 
-        images: true, 
+      include: {
+        images: true,
         category: true,
-        user: { select: { firstName: true, lastName: true } }
+        user: { select: { firstName: true, lastName: true } },
       },
     });
 
@@ -162,15 +154,12 @@ export class ProductsService {
       where: { userId },
       select: { familyId: true },
     });
-    const familyIds = userFamilies.map(f => f.familyId);
+    const familyIds = userFamilies.map((f) => f.familyId);
 
     const product = await this.prisma.product.findFirst({
-      where: { 
+      where: {
         id,
-        OR: [
-          { userId },
-          { familyId: { in: familyIds } }
-        ]
+        OR: [{ userId }, { familyId: { in: familyIds } }],
       },
     });
 
@@ -180,12 +169,9 @@ export class ProductsService {
 
     if (data.categoryId) {
       const category = await this.prisma.category.findFirst({
-        where: { 
+        where: {
           id: data.categoryId,
-          OR: [
-            { userId },
-            { familyId: { in: familyIds } }
-          ]
+          OR: [{ userId }, { familyId: { in: familyIds } }],
         },
       });
       if (!category) {
@@ -210,15 +196,12 @@ export class ProductsService {
       where: { userId },
       select: { familyId: true },
     });
-    const familyIds = userFamilies.map(f => f.familyId);
+    const familyIds = userFamilies.map((f) => f.familyId);
 
     const product = await this.prisma.product.findFirst({
-      where: { 
+      where: {
         id,
-        OR: [
-          { userId },
-          { familyId: { in: familyIds } }
-        ]
+        OR: [{ userId }, { familyId: { in: familyIds } }],
       },
       include: { images: true },
     });
@@ -254,15 +237,12 @@ export class ProductsService {
       where: { userId },
       select: { familyId: true },
     });
-    const familyIds = userFamilies.map(f => f.familyId);
+    const familyIds = userFamilies.map((f) => f.familyId);
 
     const product = await this.prisma.product.findFirst({
-      where: { 
+      where: {
         id: productId,
-        OR: [
-          { userId },
-          { familyId: { in: familyIds } }
-        ]
+        OR: [{ userId }, { familyId: { in: familyIds } }],
       },
     });
 
@@ -292,17 +272,14 @@ export class ProductsService {
       where: { userId },
       select: { familyId: true },
     });
-    const familyIds = userFamilies.map(f => f.familyId);
+    const familyIds = userFamilies.map((f) => f.familyId);
 
     const image = await this.prisma.productImage.findFirst({
       where: {
         id: imageId,
         productId,
-        product: { 
-          OR: [
-            { userId },
-            { familyId: { in: familyIds } }
-          ]
+        product: {
+          OR: [{ userId }, { familyId: { in: familyIds } }],
         },
       },
     });
@@ -336,17 +313,14 @@ export class ProductsService {
       where: { userId },
       select: { familyId: true },
     });
-    const familyIds = userFamilies.map(f => f.familyId);
+    const familyIds = userFamilies.map((f) => f.familyId);
 
     const image = await this.prisma.productImage.findFirst({
       where: {
         id: imageId,
         productId,
-        product: { 
-          OR: [
-            { userId },
-            { familyId: { in: familyIds } }
-          ]
+        product: {
+          OR: [{ userId }, { familyId: { in: familyIds } }],
         },
       },
     });

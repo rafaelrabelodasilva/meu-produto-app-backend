@@ -41,8 +41,13 @@ export class FamiliesService {
       },
     });
 
-    if (!member || (member.role !== FamilyRole.OWNER && member.role !== FamilyRole.ADMIN)) {
-      throw new ForbiddenException('Apenas proprietários ou administradores podem gerar códigos de convite');
+    if (
+      !member ||
+      (member.role !== FamilyRole.OWNER && member.role !== FamilyRole.ADMIN)
+    ) {
+      throw new ForbiddenException(
+        'Apenas proprietários ou administradores podem gerar códigos de convite',
+      );
     }
 
     const inviteCode = crypto.randomBytes(4).toString('hex').toUpperCase(); // 8 caracteres alfanuméricos
@@ -131,7 +136,9 @@ export class FamiliesService {
     });
 
     if (!member || member.role !== FamilyRole.OWNER) {
-      throw new ForbiddenException('Apenas o dono pode editar o nome da família');
+      throw new ForbiddenException(
+        'Apenas o dono pode editar o nome da família',
+      );
     }
 
     return this.prisma.family.update({
@@ -140,12 +147,19 @@ export class FamiliesService {
     });
   }
 
-  async removeMember(adminId: string, familyId: string, memberIdToRemove: string) {
+  async removeMember(
+    adminId: string,
+    familyId: string,
+    memberIdToRemove: string,
+  ) {
     const admin = await this.prisma.familyMember.findUnique({
       where: { userId_familyId: { userId: adminId, familyId } },
     });
 
-    if (!admin || (admin.role !== FamilyRole.OWNER && admin.role !== FamilyRole.ADMIN)) {
+    if (
+      !admin ||
+      (admin.role !== FamilyRole.OWNER && admin.role !== FamilyRole.ADMIN)
+    ) {
       throw new ForbiddenException('Sem permissão para remover membros');
     }
 
@@ -177,7 +191,9 @@ export class FamiliesService {
     });
 
     if (memberCount > 1) {
-      throw new BadRequestException('Remova todos os membros antes de excluir a família');
+      throw new BadRequestException(
+        'Remova todos os membros antes de excluir a família',
+      );
     }
 
     // Usar transação para garantir que tudo ocorra ou nada ocorra

@@ -129,7 +129,9 @@ export class ProductsController {
     files: Express.Multer.File[],
   ) {
     if (!files || files.length === 0) {
-      throw new BadRequestException('Pelo menos um arquivo de imagem ("files") deve ser enviado');
+      throw new BadRequestException(
+        'Pelo menos um arquivo de imagem ("files") deve ser enviado',
+      );
     }
     const images = await this.productsService.uploadImages(
       id,
@@ -163,7 +165,7 @@ export class ProductsController {
         file: {
           type: 'string',
           format: 'binary',
-          description: 'Pode ser enviado como "file" ou "files"'
+          description: 'Pode ser enviado como "file" ou "files"',
         },
         type: {
           type: 'string',

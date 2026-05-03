@@ -1,5 +1,5 @@
-import { hash } from "bcryptjs";
-import prismaClient from "../../prisma";
+import { hash } from 'bcryptjs';
+import prismaClient from '../../prisma';
 
 interface UpdateUserRequest {
   userId: string;
@@ -11,11 +11,14 @@ interface UpdateUserRequest {
 
 class UpdateUserService {
   async execute({
-    userId, firstName, lastName, email, password,
+    userId,
+    firstName,
+    lastName,
+    email,
+    password,
   }: UpdateUserRequest) {
-    
     if (!userId) {
-      throw new Error("Informe o Id do usuário.");
+      throw new Error('Informe o Id do usuário.');
     }
 
     const user = await prismaClient.user.findUnique({
@@ -23,11 +26,13 @@ class UpdateUserService {
     });
 
     if (!user) {
-      throw new Error("Usuário não encontrado.");
+      throw new Error('Usuário não encontrado.');
     }
 
-    if (!firstName && !lastName && !email && !password){
-      throw new Error("É necessário informar ao menos um dado para atualizar o usuário.")
+    if (!firstName && !lastName && !email && !password) {
+      throw new Error(
+        'É necessário informar ao menos um dado para atualizar o usuário.',
+      );
     }
 
     const updatedUser = await prismaClient.user.update({
@@ -46,8 +51,8 @@ class UpdateUserService {
       },
     });
 
-    return updatedUser
+    return updatedUser;
   }
 }
 
-export { UpdateUserService }
+export { UpdateUserService };
