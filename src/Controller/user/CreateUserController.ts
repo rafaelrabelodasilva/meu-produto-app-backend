@@ -3,7 +3,18 @@ import { CreateUserService } from '../../services/user/CreateUserService';
 
 class CreateUserController {
   async handle(req: Request, res: Response) {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body as {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      password?: string;
+    };
+
+    if (!firstName || !lastName || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: 'Todos os campos são obrigatórios' });
+    }
 
     const createUserService = new CreateUserService();
 

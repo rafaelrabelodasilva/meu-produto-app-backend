@@ -5,7 +5,13 @@ import {
   IsDateString,
   IsNumber,
   ValidateIf,
+  IsEnum,
 } from 'class-validator';
+
+export enum ProductType {
+  MAIN = 'MAIN',
+  ACCESSORY = 'ACCESSORY',
+}
 
 export class CreateProductDto {
   @ApiProperty({ description: 'Nome do produto', example: 'iPhone 15 Pro' })
@@ -54,12 +60,29 @@ export class CreateProductDto {
   @IsString()
   notes?: string;
 
+  @ApiProperty({
+    description: 'Tipo do produto: MAIN ou ACCESSORY',
+    example: 'MAIN',
+    enum: ProductType,
+  })
+  @IsEnum(ProductType)
+  type: ProductType;
+
   @ApiPropertyOptional({
     description: 'ID da categoria do produto',
     example: 'uuid-da-categoria',
   })
   @IsOptional()
-  @ValidateIf((o) => o.categoryId !== null)
+  @ValidateIf((o: CreateProductDto) => o.categoryId !== null)
   @IsString()
   categoryId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'IDs de produtos vinculados (acessórios, complementos)',
+    example: ['uuid-produto-1', 'uuid-produto-2'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsString({ each: true })
+  linkedProductIds?: string[];
 }

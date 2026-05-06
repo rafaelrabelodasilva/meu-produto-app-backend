@@ -64,8 +64,11 @@ export class UsersService {
       return await this.prismaService.user.delete({
         where: { id },
       });
-    } catch (error: any) {
-      if (error?.code === 'P2025') {
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error as Record<string, any>).code === 'P2025'
+      ) {
         throw new NotFoundException(`Usuário ${id} não encontrado`);
       }
       throw error;

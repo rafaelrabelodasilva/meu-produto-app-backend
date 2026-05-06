@@ -26,7 +26,7 @@ export function isAuthenticated(
     req.user_id = sub;
 
     return next();
-  } catch (error) {
+  } catch {
     return res.status(401).end();
   }
 }

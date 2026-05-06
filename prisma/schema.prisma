@@ -67,6 +67,11 @@ model FamilyMember {
   @@map("family_members")
 }
 
+enum ProductType {
+  MAIN
+  ACCESSORY
+}
+
 model Product {
   id           String    @id @default(uuid())
   name         String
@@ -76,6 +81,7 @@ model Product {
   purchaseDate DateTime?
   price        Decimal?
   notes        String?
+  type         ProductType @default(MAIN)
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -87,6 +93,10 @@ model Product {
   category   Category? @relation(fields: [categoryId], references: [id])
 
   images ProductImage[]
+
+  // Auto-relacionamento para produtos vinculados
+  linkedProducts Product[] @relation("ProductLinks")
+  linkedBy       Product[] @relation("ProductLinks")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

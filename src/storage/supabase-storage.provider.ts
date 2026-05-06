@@ -6,7 +6,7 @@ import * as path from 'path';
 
 @Injectable()
 export class SupabaseStorageProvider extends StorageProvider {
-  private supabase: SupabaseClient;
+  private supabase: SupabaseClient<any, any, any>;
   private bucketName: string;
 
   constructor() {
@@ -16,7 +16,9 @@ export class SupabaseStorageProvider extends StorageProvider {
     this.bucketName = process.env.SUPABASE_BUCKET || 'meu-produto-images';
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_KEY must be defined in environment variables');
+      throw new Error(
+        'SUPABASE_URL and SUPABASE_KEY must be defined in environment variables',
+      );
     }
 
     this.supabase = createClient(supabaseUrl, supabaseKey);

@@ -7,10 +7,19 @@ import { isAuthenticated } from './middlewares/isAuthenticated';
 
 const router = Router();
 
-router.post('/users', new CreateUserController().handle);
-router.put('/users', isAuthenticated, new UpdateUserController().handle);
-router.post('/session', new AuthUserController().handle);
-router.get('/me', isAuthenticated, new DetailUserController().handle);
+const createUserController = new CreateUserController();
+const updateUserController = new UpdateUserController();
+const authUserController = new AuthUserController();
+const detailUserController = new DetailUserController();
+
+router.post('/users', (req, res) => createUserController.handle(req, res));
+router.put('/users', isAuthenticated, (req, res) =>
+  updateUserController.handle(req, res),
+);
+router.post('/session', (req, res) => authUserController.handle(req, res));
+router.get('/me', isAuthenticated, (req, res) =>
+  detailUserController.handle(req, res),
+);
 
 // router.get('/teste', (req: Request, res: Response) => {
 //   return res.json({

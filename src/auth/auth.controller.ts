@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from './types/auth-user.type';
@@ -64,7 +65,7 @@ export class AuthController {
 
   @Post('reset-password')
   @ApiOperation({ summary: 'Redefinir senha usando o código recebido' })
-  resetPassword(@Body() body: any) {
+  resetPassword(@Body() body: ResetPasswordDto) {
     return this.authService.resetPassword(body);
   }
 }

@@ -9,7 +9,7 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     nullable: true,
   })
   @IsOptional()
-  @ValidateIf((o) => o.categoryId !== null)
+  @ValidateIf((o: UpdateProductDto) => o.categoryId !== null)
   @IsString()
   categoryId?: string | null;
 }

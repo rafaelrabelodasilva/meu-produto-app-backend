@@ -1,15 +1,25 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import * as Multer from 'multer';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { StorageService } from '../storage/storage.service';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
 import { Prisma } from '@prisma/client';
+
+interface ProductImage {
+  id: string;
+  url: string;
+  type: string;
+  productId: string;
+  createdAt: Date;
+}
+
+interface ProductWithRelations {
+  images: ProductImage[];
+  linkedProducts?: { images: ProductImage[] }[];
+  linkedBy?: { images: ProductImage[] }[];
+  [key: string]: any;
+}
 
 @Injectable()
 export class ProductsService {
@@ -19,7 +29,6 @@ export class ProductsService {
   ) {}
 
   async create(userId: string, data: CreateProductDto) {
-    // Buscar se o usuário pertence a alguma família para associar o produto à família principal
     const familyMember = await this.prisma.familyMember.findFirst({
       where: { userId },
     });
@@ -36,23 +45,34 @@ export class ProductsService {
       }
     }
 
+    const { linkedProductIds, ...productData } = data;
+
     const product = await this.prisma.product.create({
       data: {
-        ...data,
-        purchaseDate: data.purchaseDate
-          ? new Date(data.purchaseDate)
+        ...productData,
+        type: productData.type || 'MAIN',
+        purchaseDate: productData.purchaseDate
+          ? new Date(productData.purchaseDate)
           : undefined,
         userId,
-        familyId: familyMember?.familyId, // Associa à família se existir
+        familyId: familyMember?.familyId,
+        linkedProducts: linkedProductIds
+          ? {
+              connect: linkedProductIds.map((id) => ({ id })),
+            }
+          : undefined,
       },
-      include: { 
+      include: {
         category: true,
         images: true,
-        user: { select: { firstName: true, lastName: true } }
+        user: { select: { firstName: true, lastName: true } },
+        linkedProducts: {
+          include: { images: true, category: true },
+        },
       },
     });
 
-    return this.formatProduct(product);
+    return this.formatProduct(product as unknown as ProductWithRelations);
   }
 
   async findAll(userId: string, query: FindAllProductsDto) {
@@ -64,33 +84,14 @@ export class ProductsService {
     const brand = query.brand;
     const categoryId = query.categoryId;
 
-    const skip = (page - 1) * limit;
-
-    // Buscar IDs das famílias das quais o usuário faz parte
     const userFamilies = await this.prisma.familyMember.findMany({
       where: { userId },
       select: { familyId: true },
     });
     const familyIds = userFamilies.map((f) => f.familyId);
 
-    // AUTO-SYNC: Se o usuário tiver EXATAMENTE uma família, vincular produtos órfãos a ela
-    if (familyIds.length === 1) {
-      await this.prisma.product.updateMany({
-        where: { userId, familyId: null },
-        data: { familyId: familyIds[0] },
-      });
-      // Sincronizar categorias também
-      await this.prisma.category.updateMany({
-        where: { userId, familyId: null },
-        data: { familyId: familyIds[0] },
-      });
-    }
-
     const where: Prisma.ProductWhereInput = {
-      OR: [
-        { userId }, // Produtos do próprio usuário
-        { familyId: { in: familyIds } }, // Produtos das famílias do usuário
-      ],
+      OR: [{ userId }, { familyId: { in: familyIds } }],
       ...(categoryId && { categoryId }),
       ...(brand && { brand: { contains: brand, mode: 'insensitive' } }),
       ...(search && {
@@ -106,18 +107,23 @@ export class ProductsService {
       this.prisma.product.count({ where }),
       this.prisma.product.findMany({
         where,
-        include: { 
-          images: true, 
+        include: {
+          images: true,
           category: true,
-          user: { // Incluir dados do criador
-            select: { firstName: true, lastName: true }
-          }
+          linkedBy: true, // Adicionado para identificar órfãos
+          user: {
+            select: { firstName: true, lastName: true },
+          },
         },
         orderBy: { [sortBy]: order } as Prisma.ProductOrderByWithRelationInput,
+        skip: (page - 1) * limit,
+        take: limit,
       }),
     ]);
 
-    const formattedItems = items.map(product => this.formatProduct(product));
+    const formattedItems = items.map((product) =>
+      this.formatProduct(product as unknown as ProductWithRelations),
+    );
 
     return {
       data: formattedItems,
@@ -130,7 +136,6 @@ export class ProductsService {
   }
 
   async findOne(id: string, userId: string) {
-    // Buscar famílias do usuário
     const userFamilies = await this.prisma.familyMember.findMany({
       where: { userId },
       select: { familyId: true },
@@ -146,6 +151,12 @@ export class ProductsService {
         images: true,
         category: true,
         user: { select: { firstName: true, lastName: true } },
+        linkedProducts: {
+          include: { images: true, category: true },
+        },
+        linkedBy: {
+          include: { images: true, category: true },
+        },
       },
     });
 
@@ -153,27 +164,39 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado');
     }
 
-    return this.formatProduct(product);
+    return this.formatProduct(product as unknown as ProductWithRelations);
   }
 
-  private formatProduct(product: any) {
+  private formatProduct(product: ProductWithRelations) {
     if (!product) return null;
     const supabaseUrl = process.env.SUPABASE_URL;
     const bucketName = process.env.SUPABASE_BUCKET || 'meu-produto-images';
 
+    const formatImages = (images: ProductImage[]) =>
+      images?.map((img) => ({
+        ...img,
+        url: img.url.startsWith('http')
+          ? img.url
+          : `${supabaseUrl}/storage/v1/object/public/${bucketName}/${img.url}`,
+      })) || [];
+
     return {
       ...product,
-      images: product.images?.map(img => ({
-        ...img,
-        url: img.url.startsWith('http') 
-          ? img.url 
-          : `${supabaseUrl}/storage/v1/object/public/${bucketName}/${img.url}`
-      })) || []
+      images: formatImages(product.images),
+      linkedProducts:
+        product.linkedProducts?.map((lp) => ({
+          ...lp,
+          images: formatImages(lp.images),
+        })) || [],
+      linkedBy:
+        product.linkedBy?.map((lb) => ({
+          ...lb,
+          images: formatImages(lb.images),
+        })) || [],
     };
   }
 
   async update(id: string, userId: string, data: UpdateProductDto) {
-    // Verificar permissão (pertence ao usuário ou à família do usuário)
     const userFamilies = await this.prisma.familyMember.findMany({
       where: { userId },
       select: { familyId: true },
@@ -191,34 +214,35 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado');
     }
 
-    if (data.categoryId) {
-      const category = await this.prisma.category.findFirst({
-        where: {
-          id: data.categoryId,
-          OR: [{ userId }, { familyId: { in: familyIds } }],
-        },
-      });
-      if (!category) {
-        throw new NotFoundException('Categoria não encontrada.');
-      }
-    }
+    const { linkedProductIds, ...productData } = data;
 
     const updated = await this.prisma.product.update({
       where: { id },
       data: {
-        ...data,
-        purchaseDate: data.purchaseDate
-          ? new Date(data.purchaseDate)
+        ...productData,
+        purchaseDate: productData.purchaseDate
+          ? new Date(productData.purchaseDate)
+          : undefined,
+        linkedProducts: linkedProductIds
+          ? {
+              set: linkedProductIds.map((id) => ({ id })),
+            }
           : undefined,
       },
-      include: { 
-        images: true, 
+      include: {
+        images: true,
         category: true,
-        user: { select: { firstName: true, lastName: true } }
+        user: { select: { firstName: true, lastName: true } },
+        linkedProducts: {
+          include: { images: true, category: true },
+        },
+        linkedBy: {
+          include: { images: true, category: true },
+        },
       },
     });
 
-    return this.formatProduct(updated);
+    return this.formatProduct(updated as unknown as ProductWithRelations);
   }
 
   async remove(id: string, userId: string) {
@@ -298,9 +322,9 @@ export class ProductsService {
     const supabaseUrl = process.env.SUPABASE_URL;
     const bucketName = process.env.SUPABASE_BUCKET || 'meu-produto-images';
 
-    return images.map(img => ({
+    return images.map((img) => ({
       ...img,
-      url: `${supabaseUrl}/storage/v1/object/public/${bucketName}/${img.url}`
+      url: `${supabaseUrl}/storage/v1/object/public/${bucketName}/${img.url}`,
     }));
   }
 

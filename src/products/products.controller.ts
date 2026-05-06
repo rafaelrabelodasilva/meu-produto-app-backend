@@ -12,21 +12,19 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
-  UploadedFile,
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
   BadRequestException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import * as Multer from 'multer';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { UploadImageDto } from './dto/upload-image.dto';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiOperation,

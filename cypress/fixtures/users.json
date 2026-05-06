@@ -1,8 +1,0 @@
-{
-  "novoUsuario": {
-    "firstName": "Usuario",
-    "lastName": "Automacao",
-    "email": "automacao_fixture@email.com",
-    "password": "Teste@1234"
-  }
-}

@@ -3,8 +3,12 @@ import { CreateCategoryService } from '../../../services/user/category/CreateCat
 
 class CreateCategoryController {
   async handle(req: Request, res: Response) {
-    const { name } = req.body;
+    const { name } = req.body as { name?: string };
     const userId = req.user_id;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Nome da categoria é obrigatório' });
+    }
 
     const createCategoryService = new CreateCategoryService();
     const category = await createCategoryService.execute({

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { StorageProvider } from './storage.provider';
-import * as Multer from 'multer';
 
 @Injectable()
 export class StorageService {

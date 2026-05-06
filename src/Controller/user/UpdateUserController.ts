@@ -3,7 +3,17 @@ import { UpdateUserService } from '../../services/user/UpdateUserService';
 
 class UpdateUserController {
   async handle(req: Request, res: Response) {
-    const { userId, firstName, lastName, email, password } = req.body;
+    const { userId, firstName, lastName, email, password } = req.body as {
+      userId?: string;
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      password?: string;
+    };
+
+    if (!userId) {
+      return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    }
 
     const updateUserService = new UpdateUserService();
 

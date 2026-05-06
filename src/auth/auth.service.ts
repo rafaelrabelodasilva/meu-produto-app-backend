@@ -4,6 +4,8 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from './types/jwt-payload.type';
 
+import { ResetPasswordDto } from './dto/reset-password.dto';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -126,7 +128,7 @@ export class AuthService {
     return { message: 'Código de recuperação enviado para o e-mail' };
   }
 
-  async resetPassword(body: any) {
+  async resetPassword(body: ResetPasswordDto) {
     const { email, code, newPassword } = body;
 
     const user = await this.prisma.user.findUnique({

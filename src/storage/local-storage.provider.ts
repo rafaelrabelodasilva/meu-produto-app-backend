@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { StorageProvider } from './storage.provider';
-import * as Multer from 'multer';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +10,7 @@ export class LocalStorageProvider extends StorageProvider {
 
   constructor() {
     super();
-    this.ensureDirExists(this.uploadDir);
+    void this.ensureDirExists(this.uploadDir);
   }
 
   private async ensureDirExists(dir: string) {
@@ -55,7 +54,10 @@ export class LocalStorageProvider extends StorageProvider {
     } catch (error) {
       // Se o arquivo não existir, ignoramos silenciosamente
       // Caso contrário, logamos o erro (ex: erro de permissão)
-      if (error.code !== 'ENOENT') {
+      if (
+        error instanceof Error &&
+        (error as Record<string, any>).code !== 'ENOENT'
+      ) {
         console.error(
           `Erro ao deletar arquivo ou pasta em ${absolutePath}:`,
           error,
